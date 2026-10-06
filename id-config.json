@@ -13,14 +13,5 @@
     "Operations"
   ],
   "photo": "images/avatar.jpg",
-  "links": [
-    {
-      "label": "Links",
-      "href": "https://www.truongnpt.com/links/"
-    },
-    {
-      "label": "Work",
-      "href": "https://guihangmy.com"
-    }
-  ]
+  "links": []
 }
