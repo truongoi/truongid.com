@@ -445,10 +445,25 @@
         var tiltButton = document.getElementById("tilt-button");
         var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
         var baseline = null;
-        var orientationEnabled = false;
+        var motionBaseline = null;
+        var sensorsEnabled = false;
+        var lastOrientationAt = 0;
 
         function clamp(value, min, max) {
           return Math.min(Math.max(value, min), max);
+        }
+
+        function screenAngle() {
+          if (screen.orientation && typeof screen.orientation.angle === "number") return screen.orientation.angle;
+          return typeof window.orientation === "number" ? window.orientation : 0;
+        }
+
+        function mapForScreen(x, y) {
+          var angle = ((screenAngle() % 360) + 360) % 360;
+          if (angle === 90) return { x: y, y: -x };
+          if (angle === 270) return { x: -y, y: x };
+          if (angle === 180) return { x: -x, y: -y };
+          return { x: x, y: y };
         }
 
         function setTilt(x, y) {
@@ -461,11 +476,12 @@
 
         function resetTilt() {
           baseline = null;
+          motionBaseline = null;
           setTilt(0, 0);
         }
 
         function handlePointer(event) {
-          if (orientationEnabled || reduceMotion.matches || event.pointerType === "touch") return;
+          if (sensorsEnabled || reduceMotion.matches || event.pointerType === "touch") return;
           var rect = scene.getBoundingClientRect();
           var x = (event.clientX - rect.left) / rect.width - 0.5;
           var y = (event.clientY - rect.top) / rect.height - 0.5;
@@ -474,46 +490,78 @@
 
         function handleOrientation(event) {
           if (reduceMotion.matches || event.beta === null || event.gamma === null) return;
-          if (!baseline) baseline = { beta: event.beta, gamma: event.gamma };
-          var x = clamp((event.gamma - baseline.gamma) * 0.22, -7, 7);
-          var y = clamp((event.beta - baseline.beta) * -0.16, -6, 6);
+          var reading = mapForScreen(event.gamma, event.beta);
+          lastOrientationAt = Date.now();
+          if (!baseline) baseline = reading;
+          var x = clamp((reading.x - baseline.x) * 0.24, -7, 7);
+          var y = clamp((reading.y - baseline.y) * -0.17, -6, 6);
           setTilt(x, y);
         }
 
-        function enableOrientation() {
-          if (orientationEnabled) return;
+        function handleMotion(event) {
+          if (reduceMotion.matches || Date.now() - lastOrientationAt < 500) return;
+          var gravity = event.accelerationIncludingGravity;
+          if (!gravity || gravity.x === null || gravity.y === null || gravity.z === null) return;
+          var roll = Math.atan2(gravity.x, Math.sqrt(gravity.y * gravity.y + gravity.z * gravity.z)) * 180 / Math.PI;
+          var pitch = Math.atan2(gravity.y, Math.sqrt(gravity.x * gravity.x + gravity.z * gravity.z)) * 180 / Math.PI;
+          var reading = mapForScreen(roll, pitch);
+          if (!motionBaseline) motionBaseline = reading;
+          var x = clamp((reading.x - motionBaseline.x) * 0.24, -7, 7);
+          var y = clamp((reading.y - motionBaseline.y) * 0.17, -6, 6);
+          setTilt(x, y);
+        }
+
+        function enableSensors() {
+          if (sensorsEnabled || reduceMotion.matches) return;
           window.addEventListener("deviceorientation", handleOrientation, true);
-          orientationEnabled = true;
+          window.addEventListener("devicemotion", handleMotion, true);
+          sensorsEnabled = true;
           tiltButton.classList.remove("is-visible");
           tiltButton.setAttribute("aria-hidden", "true");
         }
 
+        function markUnavailable() {
+          tiltButton.textContent = "Phone tilt unavailable";
+          tiltButton.disabled = true;
+        }
+
+        function requestSensorPermission() {
+          var requests = [];
+          if (window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission === "function") {
+            requests.push(window.DeviceOrientationEvent.requestPermission());
+          }
+          if (window.DeviceMotionEvent && typeof window.DeviceMotionEvent.requestPermission === "function") {
+            requests.push(window.DeviceMotionEvent.requestPermission());
+          }
+          Promise.all(requests).then(function (states) {
+            if (states.every(function (state) { return state === "granted"; })) enableSensors();
+            else markUnavailable();
+          }).catch(markUnavailable);
+        }
+
         scene.addEventListener("pointermove", handlePointer);
         scene.addEventListener("pointerleave", function () {
-          if (!orientationEnabled) setTilt(0, 0);
+          if (!sensorsEnabled) setTilt(0, 0);
         });
         window.addEventListener("orientationchange", resetTilt);
+        document.addEventListener("visibilitychange", function () {
+          if (!document.hidden) resetTilt();
+        });
 
-        if (window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission === "function" && !reduceMotion.matches) {
+        var needsPermission =
+          (window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission === "function") ||
+          (window.DeviceMotionEvent && typeof window.DeviceMotionEvent.requestPermission === "function");
+
+        if (needsPermission && !reduceMotion.matches) {
           tiltButton.classList.add("is-visible");
-          tiltButton.addEventListener("click", function () {
-            window.DeviceOrientationEvent.requestPermission().then(function (state) {
-              if (state === "granted") enableOrientation();
-              else {
-                tiltButton.textContent = "Tilt unavailable";
-                tiltButton.disabled = true;
-              }
-            }).catch(function () {
-              tiltButton.textContent = "Tilt unavailable";
-              tiltButton.disabled = true;
-            });
-          });
-        } else if (window.DeviceOrientationEvent && !reduceMotion.matches) {
-          enableOrientation();
+          tiltButton.addEventListener("click", requestSensorPermission);
+        } else if ((window.DeviceOrientationEvent || window.DeviceMotionEvent) && !reduceMotion.matches) {
+          enableSensors();
         }
 
         reduceMotion.addEventListener("change", function (event) {
           if (event.matches) resetTilt();
+          else if (!needsPermission) enableSensors();
         });
       }());
     </script>
