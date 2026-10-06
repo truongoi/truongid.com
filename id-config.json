@@ -1,0 +1,26 @@
+{
+  "pageTitle": "Truong Nguyen — Professional ID",
+  "portraitCode": "TRUONG / ID-01",
+  "serial": "TN — 2026",
+  "eyebrow": "Professional identity",
+  "firstName": "Truong",
+  "lastName": "Nguyen.",
+  "role": "Front-end engineer",
+  "statement": "I build clear, dependable web experiences and practical systems that make complicated work feel simple.",
+  "specialties": [
+    "Interfaces",
+    "Systems",
+    "Operations"
+  ],
+  "photo": "images/avatar.jpg",
+  "links": [
+    {
+      "label": "Links",
+      "href": "https://www.truongnpt.com/links/"
+    },
+    {
+      "label": "Work",
+      "href": "https://guihangmy.com"
+    }
+  ]
+}
