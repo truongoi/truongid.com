@@ -363,10 +363,7 @@
                   <span>Systems</span>
                   <span>Operations</span>
                 </div>
-                <nav class="links" id="links-nav" aria-label="Profile links">
-                  <a href="https://www.truongnpt.com/links/" target="_blank" rel="noopener noreferrer">Links ↗</a>
-                  <a href="https://guihangmy.com" target="_blank" rel="noopener noreferrer">Work ↗</a>
-                </nav>
+                <nav class="links" id="links-nav" aria-label="Profile links" style="display:none"></nav>
               </div>
             </div>
           </div>
@@ -431,6 +428,7 @@
                   a.textContent = l.label + " \u2197";
                   nav.appendChild(a);
                 });
+                nav.style.display = cfg.links.length ? "" : "none";
               }
             }
             if (cfg.pageTitle) document.title = cfg.pageTitle;
