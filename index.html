@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#e9e5dc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d1214" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="data:," />
+    <title>Truong Nguyen — Professional ID</title>
+    <meta name="description" content="The professional card of Truong Nguyen, front-end engineer and builder of practical digital systems." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --room: #e9e5dc;
+        --room-line: rgba(30, 38, 41, 0.08);
+        --card: #f7f4ed;
+        --card-2: #e6e1d8;
+        --ink: #151a1c;
+        --muted: #5a6263;
+        --line: rgba(25, 32, 34, 0.18);
+        --accent: #c23b22;
+        --accent-ink: #fffaf4;
+        --shadow: rgba(25, 29, 30, 0.26);
+        --sans: "Manrope", sans-serif;
+        --serif: "Newsreader", serif;
+        --mono: "IBM Plex Mono", monospace;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --room: #0d1214;
+          --room-line: rgba(238, 241, 234, 0.055);
+          --card: #20282b;
+          --card-2: #171e20;
+          --ink: #f5f1e8;
+          --muted: #b9c0be;
+          --line: rgba(245, 241, 232, 0.18);
+          --accent: #f06b4e;
+          --accent-ink: #15191b;
+          --shadow: rgba(0, 0, 0, 0.58);
+        }
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body { min-height: 100%; }
+
+      body {
+        margin: 0;
+        overflow-x: hidden;
+        background-color: var(--room);
+        background-image:
+          linear-gradient(var(--room-line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--room-line) 1px, transparent 1px);
+        background-size: 46px 46px;
+        color: var(--ink);
+        font-family: var(--sans);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a, button { -webkit-tap-highlight-color: transparent; }
+      ::selection { background: var(--accent); color: var(--accent-ink); }
+
+      .scene {
+        position: relative;
+        display: grid;
+        place-items: center;
+        min-height: 100svh;
+        padding: max(48px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(64px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+        perspective: 1200px;
+        isolation: isolate;
+      }
+
+      .scene::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background: linear-gradient(150deg, transparent 0 42%, rgba(194, 59, 34, 0.055) 42% 58%, transparent 58% 100%);
+        pointer-events: none;
+      }
+
+      .float-shell {
+        width: min(860px, calc(100vw - 48px));
+        animation: hover 6s ease-in-out infinite;
+        transform-style: preserve-3d;
+      }
+
+      .card {
+        --rx: 0deg;
+        --ry: 0deg;
+        --shine-x: 50%;
+        --shine-y: 50%;
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1.586 / 1;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--card);
+        box-shadow:
+          0 54px 90px -30px var(--shadow),
+          0 18px 30px -22px var(--shadow),
+          inset 0 1px 0 rgba(255, 255, 255, 0.45);
+        transform: rotateX(var(--rx)) rotateY(var(--ry));
+        transform-style: preserve-3d;
+        transition: transform 120ms ease-out, box-shadow 200ms ease;
+        will-change: transform;
+      }
+
+      .card::after {
+        content: "";
+        position: absolute;
+        inset: -1px;
+        z-index: 6;
+        border-radius: inherit;
+        background: radial-gradient(circle at var(--shine-x) var(--shine-y), rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.11) 18%, transparent 43%);
+        mix-blend-mode: soft-light;
+        opacity: 0.76;
+        pointer-events: none;
+      }
+
+      .card-grid {
+        display: grid;
+        grid-template-columns: 34% 66%;
+        height: 100%;
+      }
+
+      .portrait-panel {
+        position: relative;
+        overflow: hidden;
+        border-right: 1px solid var(--line);
+        background: var(--card-2);
+      }
+
+      .portrait-panel img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 30%;
+        filter: saturate(0.72) contrast(1.04);
+      }
+
+      .portrait-panel::after {
+        content: "";
+        position: absolute;
+        inset: auto 0 0;
+        height: 38%;
+        background: linear-gradient(transparent, rgba(13, 18, 20, 0.48));
+        pointer-events: none;
+      }
+
+      .portrait-code {
+        position: absolute;
+        left: 22px;
+        bottom: 20px;
+        z-index: 2;
+        color: #fff;
+        font: 500 10px/1.25 var(--mono);
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+      }
+
+      .card-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        padding: clamp(28px, 4.2vw, 58px);
+      }
+
+      .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        margin: 0;
+        color: var(--muted);
+        font: 500 clamp(9px, 1.2vw, 12px)/1.3 var(--mono);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 24px;
+        height: 2px;
+        flex: 0 0 auto;
+        background: var(--accent);
+      }
+
+      h1 {
+        margin: clamp(18px, 3.2vw, 34px) 0 0;
+        font: 600 clamp(42px, 7.3vw, 78px)/0.88 var(--serif);
+        letter-spacing: -0.052em;
+      }
+
+      h1 span { color: var(--accent); font-style: italic; font-weight: 500; }
+
+      .role {
+        margin: clamp(14px, 2.2vw, 24px) 0 0;
+        font-size: clamp(14px, 1.8vw, 20px);
+        font-weight: 650;
+        letter-spacing: -0.025em;
+      }
+
+      .statement {
+        max-width: 460px;
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: clamp(11px, 1.45vw, 15px);
+        line-height: 1.55;
+      }
+
+      .card-footer {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-top: auto;
+        padding-top: 22px;
+        border-top: 1px solid var(--line);
+      }
+
+      .specialties {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        max-width: 310px;
+      }
+
+      .specialties span {
+        padding: 7px 9px;
+        border: 1px solid var(--line);
+        color: var(--muted);
+        font: 500 clamp(8px, 1vw, 10px)/1 var(--mono);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .links {
+        display: flex;
+        flex: 0 0 auto;
+        gap: 8px;
+      }
+
+      .links a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 14px;
+        border: 1px solid var(--ink);
+        color: var(--ink);
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 700;
+        transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+      }
+
+      .links a:first-child { background: var(--ink); color: var(--card); }
+      .links a:hover, .links a:focus-visible { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+      .links a:focus-visible, .tilt-button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+      .serial {
+        position: absolute;
+        top: 22px;
+        right: 24px;
+        color: var(--muted);
+        font: 500 9px/1 var(--mono);
+        letter-spacing: 0.08em;
+      }
+
+      .tilt-button {
+        position: fixed;
+        left: 50%;
+        bottom: max(18px, env(safe-area-inset-bottom));
+        z-index: 10;
+        display: none;
+        min-height: 42px;
+        padding: 0 16px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--card);
+        color: var(--ink);
+        box-shadow: 0 10px 28px var(--shadow);
+        transform: translateX(-50%);
+        font: 600 11px/1 var(--sans);
+      }
+
+      .tilt-button.is-visible { display: inline-flex; align-items: center; gap: 8px; }
+      .tilt-button::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+
+      @keyframes hover {
+        0%, 100% { transform: translateY(-5px); }
+        50% { transform: translateY(7px); }
+      }
+
+      @media (max-width: 650px) {
+        .scene { padding-inline: 18px; }
+        .float-shell { width: min(100%, 560px); }
+        .card { border-radius: 18px; }
+        .card-grid { grid-template-columns: 32% 68%; }
+        .card-content { padding: 20px; }
+        .serial { top: 13px; right: 15px; font-size: 7px; }
+        .eyebrow { font-size: 8px; }
+        .eyebrow::before { width: 16px; }
+        h1 { margin-top: 14px; font-size: clamp(34px, 11.5vw, 52px); }
+        .role { margin-top: 10px; font-size: clamp(11px, 3.25vw, 15px); }
+        .statement { display: none; }
+        .card-footer { gap: 10px; padding-top: 12px; }
+        .specialties { gap: 4px; }
+        .specialties span { padding: 5px 6px; font-size: 7px; }
+        .specialties span:last-child { display: none; }
+        .links { gap: 5px; }
+        .links a { min-height: 34px; padding: 0 9px; font-size: 9px; }
+        .portrait-code { left: 12px; bottom: 12px; font-size: 7px; }
+      }
+
+      @media (max-width: 390px) {
+        .scene { padding-inline: 14px; }
+        .float-shell { width: 100%; }
+        .card-content { padding: 15px; }
+        .serial { display: none; }
+        h1 { margin-top: 10px; }
+        .role { margin-top: 7px; }
+        .card-footer { padding-top: 8px; }
+        .specialties span:nth-child(2) { display: none; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .float-shell { animation: none; }
+        .card { transition: none; transform: none !important; }
+        .card::after { display: none; }
+        .tilt-button { display: none !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="scene" id="scene">
+      <div class="float-shell">
+        <article class="card" id="card" aria-labelledby="name">
+          <div class="card-grid">
+            <div class="portrait-panel">
+              <img id="portrait" src="images/avatar.jpg" alt="Portrait of Truong Nguyen" />
+              <span class="portrait-code" id="portrait-code">TRUONG / ID-01</span>
+            </div>
+
+            <div class="card-content">
+              <span class="serial" id="serial" aria-hidden="true">TN — 2026</span>
+              <p class="eyebrow" id="eyebrow">Professional identity</p>
+              <h1 id="name">Truong<br /><span>Nguyen.</span></h1>
+              <p class="role" id="role">Front-end engineer</p>
+              <p class="statement" id="statement">I build clear, dependable web experiences and practical systems that make complicated work feel simple.</p>
+
+              <div class="card-footer">
+                <div class="specialties" id="specialties" aria-label="Specialties">
+                  <span>Interfaces</span>
+                  <span>Systems</span>
+                  <span>Operations</span>
+                </div>
+                <nav class="links" id="links-nav" aria-label="Profile links">
+                  <a href="https://www.truongnpt.com/links/" target="_blank" rel="noopener noreferrer">Links ↗</a>
+                  <a href="https://guihangmy.com" target="_blank" rel="noopener noreferrer">Work ↗</a>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <button class="tilt-button" id="tilt-button" type="button">Enable phone tilt</button>
+    </main>
+
+<script>
+      /* Card content loads from id-config.json (editable in the CMS at /admin/). Falls back to built-in defaults. */
+      (function () {
+        function setText(id, value) {
+          if (value === undefined || value === null) return;
+          var el = document.getElementById(id);
+          if (el) el.textContent = value;
+        }
+        fetch("id-config.json", { cache: "no-store" })
+          .then(function (res) { if (!res.ok) throw new Error("no config"); return res.json(); })
+          .then(function (cfg) {
+            setText("portrait-code", cfg.portraitCode);
+            setText("serial", cfg.serial);
+            setText("eyebrow", cfg.eyebrow);
+            setText("role", cfg.role);
+            setText("statement", cfg.statement);
+            var nameEl = document.getElementById("name");
+            if (nameEl && cfg.firstName) {
+              nameEl.textContent = "";
+              nameEl.appendChild(document.createTextNode(cfg.firstName));
+              nameEl.appendChild(document.createElement("br"));
+              var span = document.createElement("span");
+              span.textContent = cfg.lastName || "";
+              nameEl.appendChild(span);
+            }
+            if (cfg.photo) {
+              var img = document.getElementById("portrait");
+              if (img) {
+                img.src = cfg.photo;
+                img.alt = "Portrait of " + [cfg.firstName, cfg.lastName].filter(Boolean).join(" ");
+              }
+            }
+            if (Array.isArray(cfg.specialties)) {
+              var sp = document.getElementById("specialties");
+              if (sp) {
+                sp.textContent = "";
+                cfg.specialties.forEach(function (s) {
+                  var el = document.createElement("span");
+                  el.textContent = s;
+                  sp.appendChild(el);
+                });
+              }
+            }
+            if (Array.isArray(cfg.links)) {
+              var nav = document.getElementById("links-nav");
+              if (nav) {
+                nav.textContent = "";
+                cfg.links.forEach(function (l) {
+                  var a = document.createElement("a");
+                  a.href = l.href;
+                  a.target = "_blank";
+                  a.rel = "noopener noreferrer";
+                  a.textContent = l.label + " \u2197";
+                  nav.appendChild(a);
+                });
+              }
+            }
+            if (cfg.pageTitle) document.title = cfg.pageTitle;
+          })
+          .catch(function () {});
+      })();
+    </script>
+    <script>
+      (function () {
+        var card = document.getElementById("card");
+        var scene = document.getElementById("scene");
+        var tiltButton = document.getElementById("tilt-button");
+        var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        var baseline = null;
+        var orientationEnabled = false;
+
+        function clamp(value, min, max) {
+          return Math.min(Math.max(value, min), max);
+        }
+
+        function setTilt(x, y) {
+          if (reduceMotion.matches) return;
+          card.style.setProperty("--rx", y.toFixed(2) + "deg");
+          card.style.setProperty("--ry", x.toFixed(2) + "deg");
+          card.style.setProperty("--shine-x", clamp(50 + x * 4.6, 15, 85).toFixed(1) + "%");
+          card.style.setProperty("--shine-y", clamp(50 - y * 5.2, 15, 85).toFixed(1) + "%");
+        }
+
+        function resetTilt() {
+          baseline = null;
+          setTilt(0, 0);
+        }
+
+        function handlePointer(event) {
+          if (orientationEnabled || reduceMotion.matches || event.pointerType === "touch") return;
+          var rect = scene.getBoundingClientRect();
+          var x = (event.clientX - rect.left) / rect.width - 0.5;
+          var y = (event.clientY - rect.top) / rect.height - 0.5;
+          setTilt(x * 11, y * -8);
+        }
+
+        function handleOrientation(event) {
+          if (reduceMotion.matches || event.beta === null || event.gamma === null) return;
+          if (!baseline) baseline = { beta: event.beta, gamma: event.gamma };
+          var x = clamp((event.gamma - baseline.gamma) * 0.22, -7, 7);
+          var y = clamp((event.beta - baseline.beta) * -0.16, -6, 6);
+          setTilt(x, y);
+        }
+
+        function enableOrientation() {
+          if (orientationEnabled) return;
+          window.addEventListener("deviceorientation", handleOrientation, true);
+          orientationEnabled = true;
+          tiltButton.classList.remove("is-visible");
+          tiltButton.setAttribute("aria-hidden", "true");
+        }
+
+        scene.addEventListener("pointermove", handlePointer);
+        scene.addEventListener("pointerleave", function () {
+          if (!orientationEnabled) setTilt(0, 0);
+        });
+        window.addEventListener("orientationchange", resetTilt);
+
+        if (window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission === "function" && !reduceMotion.matches) {
+          tiltButton.classList.add("is-visible");
+          tiltButton.addEventListener("click", function () {
+            window.DeviceOrientationEvent.requestPermission().then(function (state) {
+              if (state === "granted") enableOrientation();
+              else {
+                tiltButton.textContent = "Tilt unavailable";
+                tiltButton.disabled = true;
+              }
+            }).catch(function () {
+              tiltButton.textContent = "Tilt unavailable";
+              tiltButton.disabled = true;
+            });
+          });
+        } else if (window.DeviceOrientationEvent && !reduceMotion.matches) {
+          enableOrientation();
+        }
+
+        reduceMotion.addEventListener("change", function (event) {
+          if (event.matches) resetTilt();
+        });
+      }());
+    </script>
+  </body>
+</html>
