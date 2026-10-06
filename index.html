@@ -468,8 +468,11 @@
 
         function setTilt(x, y) {
           if (reduceMotion.matches) return;
-          card.style.setProperty("--rx", y.toFixed(2) + "deg");
-          card.style.setProperty("--ry", x.toFixed(2) + "deg");
+          var rx = y.toFixed(2) + "deg";
+          var ry = x.toFixed(2) + "deg";
+          card.style.setProperty("--rx", rx);
+          card.style.setProperty("--ry", ry);
+          card.style.transform = "rotateX(" + rx + ") rotateY(" + ry + ")";
           card.style.setProperty("--shine-x", clamp(50 + x * 4.6, 15, 85).toFixed(1) + "%");
           card.style.setProperty("--shine-y", clamp(50 - y * 5.2, 15, 85).toFixed(1) + "%");
         }
