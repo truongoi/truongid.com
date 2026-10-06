@@ -1,0 +1,39 @@
+# Sveltia CMS configuration — admin lives at https://truongid.com/admin/
+# Sign in with GitHub ("Sign in with GitHub" via the auth worker below).
+
+backend:
+  name: github
+  repo: truongoi/truongid.com
+  branch: main
+  base_url: https://sveltia-cms-auth.truong-inbox.workers.dev
+
+media_folder: images
+public_folder: /images
+
+collections:
+  - name: id_card
+    label: ID Card
+    files:
+      - name: content
+        label: Card Content
+        file: id-config.json
+        fields:
+          - { label: Page Title, name: pageTitle, widget: string, hint: "Browser tab title" }
+          - { label: First Name, name: firstName, widget: string }
+          - { label: Last Name, name: lastName, widget: string }
+          - { label: Role, name: role, widget: string }
+          - { label: Eyebrow, name: eyebrow, widget: string, hint: "Small line above the name" }
+          - { label: Card Code, name: portraitCode, widget: string, hint: "Top-left of the photo panel" }
+          - { label: Serial, name: serial, widget: string, hint: "Top-right of the card" }
+          - { label: Statement, name: statement, widget: text }
+          - { label: Photo, name: photo, widget: image, required: false }
+          - label: Specialties
+            name: specialties
+            widget: list
+            field: { label: Specialty, name: specialty, widget: string }
+          - label: Links
+            name: links
+            widget: list
+            fields:
+              - { label: Label, name: label, widget: string }
+              - { label: URL, name: href, widget: string }
