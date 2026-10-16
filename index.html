@@ -200,12 +200,20 @@
         /* ---------- rendering helpers (textContent only — no innerHTML with data) ---------- */
         function scrollEnd() { pane.scrollTop = pane.scrollHeight; }
 
+        /* While a command runs, its output is collected here and then played
+           back line by line with a jittery delay — a sluggish old machine. */
+        var outQueue = null;
+        function emit(node) {
+          if (outQueue) { outQueue.push(node); return; }
+          pane.appendChild(node);
+          scrollEnd();
+        }
+
         function line(text, cls) {
           var p = document.createElement("p");
           if (cls) p.className = cls;
           p.textContent = text || "";
-          pane.appendChild(p);
-          scrollEnd();
+          emit(p);
           return p;
         }
 
@@ -227,8 +235,7 @@
               p.appendChild(span);
             }
           });
-          pane.appendChild(p);
-          scrollEnd();
+          emit(p);
           return p;
         }
 
@@ -390,6 +397,32 @@
         /* ---------- command runner ---------- */
         function done() { makePrompt(); focusInput(); }
 
+        /* Play the collected output back like a slow machine: a processing
+           pause first, then lines trickle out at uneven intervals. */
+        function playQueue(nodes, after) {
+          if (!nodes.length || reduceMotion) {
+            nodes.forEach(function (n) { pane.appendChild(n); });
+            scrollEnd();
+            after();
+            return;
+          }
+          var i = 0;
+          var step = function () {
+            if (i >= nodes.length) { after(); return; }
+            pane.appendChild(nodes[i]);
+            i++;
+            scrollEnd();
+            setTimeout(step, 65 + Math.random() * 70);
+          };
+          setTimeout(step, 280 + Math.random() * 280);
+        }
+
+        function finish() {
+          var nodes = outQueue || [];
+          outQueue = null;
+          playQueue(nodes, done);
+        }
+
         function hack() {
           var p = line("Hacking the mainframe…");
           var pct = 0;
@@ -410,14 +443,15 @@
           var input = raw.trim();
           var lower = input.toLowerCase();
           if (!input) { done(); return; }
+          outQueue = []; /* collect this command's output for slow playback */
 
           if (lower.indexOf("sudo") === 0) {
             line("visitor is not in the sudoers file. This incident will be reported to Truong.", "warn");
-            done(); return;
+            finish(); return;
           }
-          if (lower === "man") { line("What manual page do you want? Try `man truong`."); done(); return; }
-          if (lower === "man truong") { printMan(); done(); return; }
-          if (lower.indexOf("man ") === 0) { line("No manual entry for " + input.slice(4)); done(); return; }
+          if (lower === "man") { line("What manual page do you want? Try `man truong`."); finish(); return; }
+          if (lower === "man truong") { printMan(); finish(); return; }
+          if (lower.indexOf("man ") === 0) { line("No manual entry for " + input.slice(4)); finish(); return; }
 
           switch (lower) {
             case "help": printHelp(); break;
@@ -444,7 +478,7 @@
               line("  └─────┘");
               line("Error 418: I'm a teapot. The developer, however, runs on coffee.");
               break;
-            case "hack": hack(); return; /* hack calls done() itself */
+            case "hack": outQueue = null; hack(); return; /* hack paces itself and calls done() */
             case "clear":
               pane.textContent = "";
               break;
@@ -460,7 +494,7 @@
             default:
               line("zsh: command not found: " + input + " — type `help`.");
           }
-          done();
+          finish();
         }
 
         /* ---------- boot ---------- */
