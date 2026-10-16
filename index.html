@@ -3,568 +3,595 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#e9e5dc" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0d1214" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#14100c" />
     <link rel="icon" href="data:," />
     <title>Truong Nguyen — Professional ID</title>
     <meta name="description" content="The professional card of Truong Nguyen, front-end engineer and builder of practical digital systems." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet" />
     <style>
       :root {
-        color-scheme: light dark;
-        --room: #e9e5dc;
-        --room-line: rgba(30, 38, 41, 0.08);
-        --card: #f7f4ed;
-        --card-2: #e6e1d8;
-        --ink: #151a1c;
-        --muted: #5a6263;
-        --line: rgba(25, 32, 34, 0.18);
-        --accent: #c23b22;
-        --accent-ink: #fffaf4;
-        --shadow: rgba(25, 29, 30, 0.26);
-        --sans: "Manrope", sans-serif;
-        --serif: "Newsreader", serif;
-        --mono: "IBM Plex Mono", monospace;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --room: #0d1214;
-          --room-line: rgba(238, 241, 234, 0.055);
-          --card: #20282b;
-          --card-2: #171e20;
-          --ink: #f5f1e8;
-          --muted: #b9c0be;
-          --line: rgba(245, 241, 232, 0.18);
-          --accent: #f06b4e;
-          --accent-ink: #15191b;
-          --shadow: rgba(0, 0, 0, 0.58);
-        }
+        color-scheme: dark;
+        --bg: #14100c;
+        --win: #1a140e;
+        --win-edge: #3a2c1c;
+        --bar: #241b12;
+        --amber: #f0a840;
+        --amber-bright: #ffd479;
+        --amber-soft: #d99a35;
+        --amber-dim: #9a7434;
+        --warn: #ff8a66;
+        --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
       }
 
       * { box-sizing: border-box; }
 
-      html, body { min-height: 100%; }
+      html, body { height: 100%; }
 
       body {
         margin: 0;
-        overflow-x: hidden;
-        background-color: var(--room);
-        background-image:
-          linear-gradient(var(--room-line) 1px, transparent 1px),
-          linear-gradient(90deg, var(--room-line) 1px, transparent 1px);
-        background-size: 46px 46px;
-        color: var(--ink);
-        font-family: var(--sans);
+        background: var(--bg);
+        color: var(--amber);
+        font-family: var(--mono);
+        overflow: hidden;
         -webkit-font-smoothing: antialiased;
       }
 
-      a, button { -webkit-tap-highlight-color: transparent; }
-      ::selection { background: var(--accent); color: var(--accent-ink); }
-
-      .scene {
-        position: relative;
-        display: grid;
-        place-items: center;
-        min-height: 100svh;
-        padding: max(48px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(64px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
-        perspective: 1200px;
-        isolation: isolate;
-      }
-
-      .scene::before {
-        content: "";
+      .stage {
         position: fixed;
         inset: 0;
-        z-index: -1;
-        background: linear-gradient(150deg, transparent 0 42%, rgba(194, 59, 34, 0.055) 42% 58%, transparent 58% 100%);
-        pointer-events: none;
-      }
-
-      .float-shell {
-        width: min(860px, calc(100vw - 48px));
-        animation: hover 6s ease-in-out infinite;
-        transform-style: preserve-3d;
-      }
-
-      .card {
-        --rx: 0deg;
-        --ry: 0deg;
-        --shine-x: 50%;
-        --shine-y: 50%;
-        position: relative;
-        width: 100%;
-        aspect-ratio: 1.586 / 1;
-        overflow: hidden;
-        border: 1px solid var(--line);
-        border-radius: 24px;
-        background: var(--card);
-        box-shadow:
-          0 54px 90px -30px var(--shadow),
-          0 18px 30px -22px var(--shadow),
-          inset 0 1px 0 rgba(255, 255, 255, 0.45);
-        transform: rotateX(var(--rx)) rotateY(var(--ry));
-        transform-style: preserve-3d;
-        transition: transform 120ms ease-out, box-shadow 200ms ease;
-        will-change: transform;
-      }
-
-      .card::after {
-        content: "";
-        position: absolute;
-        inset: -1px;
-        z-index: 6;
-        border-radius: inherit;
-        background: radial-gradient(circle at var(--shine-x) var(--shine-y), rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.11) 18%, transparent 43%);
-        mix-blend-mode: soft-light;
-        opacity: 0.76;
-        pointer-events: none;
-      }
-
-      .card-grid {
         display: grid;
-        grid-template-columns: 34% 66%;
-        height: 100%;
+        place-items: center;
+        padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+        background:
+          radial-gradient(120% 90% at 50% 0%, rgba(240, 168, 64, 0.07), transparent 60%),
+          var(--bg);
       }
 
-      .portrait-panel {
-        position: relative;
-        overflow: hidden;
-        border-right: 1px solid var(--line);
-        background: var(--card-2);
-      }
-
-      .portrait-panel img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center 30%;
-        filter: saturate(0.72) contrast(1.04);
-      }
-
-      .portrait-panel::after {
-        content: "";
-        position: absolute;
-        inset: auto 0 0;
-        height: 38%;
-        background: linear-gradient(transparent, rgba(13, 18, 20, 0.48));
-        pointer-events: none;
-      }
-
-      .portrait-code {
-        position: absolute;
-        left: 22px;
-        bottom: 20px;
-        z-index: 2;
-        color: #fff;
-        font: 500 10px/1.25 var(--mono);
-        letter-spacing: 0.11em;
-        text-transform: uppercase;
-      }
-
-      .card-content {
-        position: relative;
-        z-index: 2;
+      .window {
         display: flex;
         flex-direction: column;
-        min-width: 0;
-        padding: clamp(28px, 4.2vw, 58px);
+        width: min(720px, 100%);
+        height: min(680px, 100%);
+        background: var(--win);
+        border: 1px solid var(--win-edge);
+        border-radius: 14px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 2px 0 rgba(255, 212, 121, 0.05) inset;
+        overflow: hidden;
       }
 
-      .eyebrow {
+      .titlebar {
+        flex: 0 0 auto;
         display: flex;
         align-items: center;
-        gap: 11px;
-        margin: 0;
-        color: var(--muted);
-        font: 500 clamp(9px, 1.2vw, 12px)/1.3 var(--mono);
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-      }
-
-      .eyebrow::before {
-        content: "";
-        width: 24px;
-        height: 2px;
-        flex: 0 0 auto;
-        background: var(--accent);
-      }
-
-      h1 {
-        margin: clamp(18px, 3.2vw, 34px) 0 0;
-        font: 600 clamp(42px, 7.3vw, 78px)/0.88 var(--serif);
-        letter-spacing: -0.052em;
-      }
-
-      h1 span { color: var(--accent); font-style: italic; font-weight: 500; }
-
-      .role {
-        margin: clamp(14px, 2.2vw, 24px) 0 0;
-        font-size: clamp(14px, 1.8vw, 20px);
-        font-weight: 650;
-        letter-spacing: -0.025em;
-      }
-
-      .statement {
-        max-width: 460px;
-        margin: 10px 0 0;
-        color: var(--muted);
-        font-size: clamp(11px, 1.45vw, 15px);
-        line-height: 1.55;
-      }
-
-      .card-footer {
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 24px;
-        margin-top: auto;
-        padding-top: 22px;
-        border-top: 1px solid var(--line);
-      }
-
-      .specialties {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 7px;
-        max-width: 310px;
-      }
-
-      .specialties span {
-        padding: 7px 9px;
-        border: 1px solid var(--line);
-        color: var(--muted);
-        font: 500 clamp(8px, 1vw, 10px)/1 var(--mono);
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-      }
-
-      .links {
-        display: flex;
-        flex: 0 0 auto;
         gap: 8px;
+        padding: 11px 14px;
+        background: var(--bar);
+        border-bottom: 1px solid var(--win-edge);
+        user-select: none;
+        -webkit-user-select: none;
       }
 
-      .links a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 42px;
-        padding: 0 14px;
-        border: 1px solid var(--ink);
-        color: var(--ink);
-        text-decoration: none;
-        font-size: 11px;
-        font-weight: 700;
-        transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+      .dot { width: 12px; height: 12px; border-radius: 50%; flex: 0 0 auto; }
+      .dot.r { background: #e0654f; }
+      .dot.y { background: #e8b34b; }
+      .dot.g { background: #7fb069; }
+
+      .titlebar .tt {
+        flex: 1 1 auto;
+        text-align: center;
+        font-size: 12.5px;
+        color: var(--amber-dim);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: 52px;
       }
 
-      .links a:first-child { background: var(--ink); color: var(--card); }
-      .links a:hover, .links a:focus-visible { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-      .links a:focus-visible, .tilt-button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
-
-      .serial {
-        position: absolute;
-        top: 22px;
-        right: 24px;
-        color: var(--muted);
-        font: 500 9px/1 var(--mono);
-        letter-spacing: 0.08em;
+      .pane {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 16px 16px 10px;
+        font-size: 14px;
+        line-height: 1.6;
+        scrollbar-width: thin;
+        scrollbar-color: var(--win-edge) transparent;
+        cursor: text;
       }
 
-      .tilt-button {
-        position: fixed;
-        left: 50%;
-        bottom: max(18px, env(safe-area-inset-bottom));
-        z-index: 10;
+      .pane::-webkit-scrollbar { width: 8px; }
+      .pane::-webkit-scrollbar-thumb { background: var(--win-edge); border-radius: 4px; }
+
+      .pane p { margin: 0 0 2px; white-space: pre-wrap; word-break: break-word; }
+      .pane .bright { color: var(--amber-bright); font-weight: 600; }
+      .pane .dim { color: var(--amber-dim); }
+      .pane .warn { color: var(--warn); }
+      .pane a { color: var(--amber-bright); text-decoration: underline; text-underline-offset: 3px; }
+      .pane a:hover { color: #ffe1a1; }
+
+      .motd-name { font-size: 19px; letter-spacing: 0.04em; }
+
+      .prompt-line {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        margin-top: 4px;
+      }
+
+      .prompt-label { color: var(--amber-bright); font-weight: 600; white-space: nowrap; }
+
+      .cmd-input {
+        flex: 1 1 auto;
+        min-width: 0;
+        background: transparent;
+        border: 0;
+        outline: 0;
+        padding: 0;
+        margin: 0;
+        font: inherit;
+        color: var(--amber-bright);
+        caret-color: var(--amber-bright);
+      }
+
+      .cursor-block {
+        flex: 0 0 auto;
+        width: 9px;
+        height: 17px;
+        margin-left: -6px;
+        background: var(--amber);
+        align-self: center;
+        animation: blink 1.06s step-end infinite;
         display: none;
-        min-height: 42px;
-        padding: 0 16px;
-        border: 1px solid var(--line);
+      }
+
+      .cursor-block.on { display: block; }
+
+      @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+      .chips {
+        flex: 0 0 auto;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+        background: var(--bar);
+        border-top: 1px solid var(--win-edge);
+      }
+
+      .chip {
+        appearance: none;
+        font: inherit;
+        font-size: 12.5px;
+        color: var(--amber-bright);
+        background: rgba(240, 168, 64, 0.08);
+        border: 1px solid var(--win-edge);
         border-radius: 999px;
-        background: var(--card);
-        color: var(--ink);
-        box-shadow: 0 10px 28px var(--shadow);
-        transform: translateX(-50%);
-        font: 600 11px/1 var(--sans);
+        padding: 6px 12px;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
       }
 
-      .tilt-button.is-visible { display: inline-flex; align-items: center; gap: 8px; }
-      .tilt-button::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+      .chip:hover { background: rgba(240, 168, 64, 0.16); }
+      .chip:active { background: rgba(240, 168, 64, 0.24); }
 
-      @keyframes hover {
-        0%, 100% { transform: translateY(-5px); }
-        50% { transform: translateY(7px); }
-      }
-
-      @media (max-width: 650px) {
-        .scene { padding-inline: 18px; }
-        .float-shell { width: min(100%, 560px); }
-        .card { border-radius: 18px; }
-        .card-grid { grid-template-columns: 32% 68%; }
-        .card-content { padding: 20px; }
-        .serial { top: 13px; right: 15px; font-size: 7px; }
-        .eyebrow { font-size: 8px; }
-        .eyebrow::before { width: 16px; }
-        h1 { margin-top: 14px; font-size: clamp(34px, 11.5vw, 52px); }
-        .role { margin-top: 10px; font-size: clamp(11px, 3.25vw, 15px); }
-        .statement { display: none; }
-        .card-footer { gap: 10px; padding-top: 12px; }
-        .specialties { gap: 4px; }
-        .specialties span { padding: 5px 6px; font-size: 7px; }
-        .specialties span:last-child { display: none; }
-        .links { gap: 5px; }
-        .links a { min-height: 34px; padding: 0 9px; font-size: 9px; }
-        .portrait-code { left: 12px; bottom: 12px; font-size: 7px; }
-      }
-
-      @media (max-width: 390px) {
-        .scene { padding-inline: 14px; }
-        .float-shell { width: 100%; }
-        .card-content { padding: 15px; }
-        .serial { display: none; }
-        h1 { margin-top: 10px; }
-        .role { margin-top: 7px; }
-        .card-footer { padding-top: 8px; }
-        .specialties span:nth-child(2) { display: none; }
+      @media (max-width: 640px) {
+        .pane { font-size: 13px; padding: 13px 13px 8px; }
+        .motd-name { font-size: 17px; }
+        .titlebar .tt { margin-right: 0; text-align: left; padding-left: 6px; }
+        .window { height: 100%; border-radius: 10px; }
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .float-shell { animation: none; }
-        .card { transition: none; transform: none !important; }
-        .card::after { display: none; }
-        .tilt-button { display: none !important; }
+        .cursor-block { animation: none; }
       }
     </style>
   </head>
   <body>
-    <main class="scene" id="scene">
-      <div class="float-shell">
-        <article class="card" id="card" aria-labelledby="name">
-          <div class="card-grid">
-            <div class="portrait-panel">
-              <img id="portrait" src="images/avatar.jpg" alt="Portrait of Truong Nguyen" />
-              <span class="portrait-code" id="portrait-code">TRUONG / ID-01</span>
-            </div>
-
-            <div class="card-content">
-              <span class="serial" id="serial" aria-hidden="true">TN — 2026</span>
-              <p class="eyebrow" id="eyebrow">Professional identity</p>
-              <h1 id="name">Truong<br /><span>Nguyen.</span></h1>
-              <p class="role" id="role">Front-end engineer</p>
-              <p class="statement" id="statement">I build clear, dependable web experiences and practical systems that make complicated work feel simple.</p>
-
-              <div class="card-footer">
-                <div class="specialties" id="specialties" aria-label="Specialties">
-                  <span>Interfaces</span>
-                  <span>Systems</span>
-                  <span>Operations</span>
-                </div>
-                <nav class="links" id="links-nav" aria-label="Profile links" style="display:none"></nav>
-              </div>
-            </div>
-          </div>
-        </article>
-      </div>
-
-      <button class="tilt-button" id="tilt-button" type="button">Enable phone tilt</button>
+    <main class="stage" id="stage">
+      <section class="window" aria-label="Interactive terminal — Truong Nguyen professional ID">
+        <div class="titlebar" aria-hidden="true">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="tt">truong@id: ~ — zsh</span>
+        </div>
+        <div class="pane" id="pane" aria-live="polite"></div>
+        <nav class="chips" aria-label="Suggested commands">
+          <button type="button" class="chip" data-cmd="man truong">man truong</button>
+          <button type="button" class="chip" data-cmd="about">about</button>
+          <button type="button" class="chip" data-cmd="skills">skills</button>
+          <button type="button" class="chip" data-cmd="joke">joke</button>
+          <button type="button" class="chip" data-cmd="help">help</button>
+        </nav>
+      </section>
     </main>
-
-<script>
-      /* Card content loads from id-config.json (editable in the CMS at /admin/). Falls back to built-in defaults. */
-      (function () {
-        function setText(id, value) {
-          if (value === undefined || value === null) return;
-          var el = document.getElementById(id);
-          if (el) el.textContent = value;
-        }
-        fetch("id-config.json", { cache: "no-store" })
-          .then(function (res) { if (!res.ok) throw new Error("no config"); return res.json(); })
-          .then(function (cfg) {
-            setText("portrait-code", cfg.portraitCode);
-            setText("serial", cfg.serial);
-            setText("eyebrow", cfg.eyebrow);
-            setText("role", cfg.role);
-            setText("statement", cfg.statement);
-            var nameEl = document.getElementById("name");
-            if (nameEl && cfg.firstName) {
-              nameEl.textContent = "";
-              nameEl.appendChild(document.createTextNode(cfg.firstName));
-              nameEl.appendChild(document.createElement("br"));
-              var span = document.createElement("span");
-              span.textContent = cfg.lastName || "";
-              nameEl.appendChild(span);
-            }
-            if (cfg.photo) {
-              var img = document.getElementById("portrait");
-              if (img) {
-                img.src = cfg.photo;
-                img.alt = "Portrait of " + [cfg.firstName, cfg.lastName].filter(Boolean).join(" ");
-              }
-            }
-            if (Array.isArray(cfg.specialties)) {
-              var sp = document.getElementById("specialties");
-              if (sp) {
-                sp.textContent = "";
-                cfg.specialties.forEach(function (s) {
-                  var el = document.createElement("span");
-                  el.textContent = s;
-                  sp.appendChild(el);
-                });
-              }
-            }
-            if (Array.isArray(cfg.links)) {
-              var nav = document.getElementById("links-nav");
-              if (nav) {
-                nav.textContent = "";
-                cfg.links.forEach(function (l) {
-                  var a = document.createElement("a");
-                  a.href = l.href;
-                  a.target = "_blank";
-                  a.rel = "noopener noreferrer";
-                  a.textContent = l.label + " \u2197";
-                  nav.appendChild(a);
-                });
-                nav.style.display = cfg.links.length ? "" : "none";
-              }
-            }
-            if (cfg.pageTitle) document.title = cfg.pageTitle;
-          })
-          .catch(function () {});
-      })();
-    </script>
     <script>
       (function () {
-        var card = document.getElementById("card");
-        var scene = document.getElementById("scene");
-        var tiltButton = document.getElementById("tilt-button");
-        var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-        var baseline = null;
-        var motionBaseline = null;
-        var sensorsEnabled = false;
-        var lastOrientationAt = 0;
+        "use strict";
 
-        function clamp(value, min, max) {
-          return Math.min(Math.max(value, min), max);
+        var DEFAULTS = {
+          pageTitle: "Truong Nguyen — Professional ID",
+          portraitCode: "TRUONG / ID-01",
+          serial: "TN — 2026",
+          eyebrow: "Professional identity",
+          firstName: "Truong",
+          lastName: "Nguyen.",
+          role: "Front-end engineer",
+          statement: "I build clear, dependable web experiences and practical systems that make complicated work feel simple.",
+          specialties: ["Interfaces", "Systems", "Operations"],
+          links: []
+        };
+        var cfg = DEFAULTS;
+
+        var pane = document.getElementById("pane");
+        var stage = document.getElementById("stage");
+        var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var history = [];
+        var histIdx = -1;
+        var currentInput = null;
+        var booted = false;
+        var bootSkipped = false;
+
+        /* ---------- rendering helpers (textContent only — no innerHTML with data) ---------- */
+        function scrollEnd() { pane.scrollTop = pane.scrollHeight; }
+
+        function line(text, cls) {
+          var p = document.createElement("p");
+          if (cls) p.className = cls;
+          p.textContent = text || "";
+          pane.appendChild(p);
+          scrollEnd();
+          return p;
         }
 
-        function screenAngle() {
-          if (screen.orientation && typeof screen.orientation.angle === "number") return screen.orientation.angle;
-          return typeof window.orientation === "number" ? window.orientation : 0;
+        function richLine(segments, cls) {
+          var p = document.createElement("p");
+          if (cls) p.className = cls;
+          segments.forEach(function (s) {
+            if (s.href) {
+              var a = document.createElement("a");
+              a.href = s.href;
+              a.target = "_blank";
+              a.rel = "noopener noreferrer";
+              a.textContent = s.t;
+              p.appendChild(a);
+            } else {
+              var span = document.createElement("span");
+              if (s.c) span.className = s.c;
+              span.textContent = s.t;
+              p.appendChild(span);
+            }
+          });
+          pane.appendChild(p);
+          scrollEnd();
+          return p;
         }
 
-        function mapForScreen(x, y) {
-          var angle = ((screenAngle() % 360) + 360) % 360;
-          if (angle === 90) return { x: y, y: -x };
-          if (angle === 270) return { x: -y, y: x };
-          if (angle === 180) return { x: -x, y: -y };
-          return { x: x, y: y };
-        }
+        function blank() { line(""); }
 
-        function setTilt(x, y) {
-          if (reduceMotion.matches) return;
-          var rx = y.toFixed(2) + "deg";
-          var ry = x.toFixed(2) + "deg";
-          card.style.setProperty("--rx", rx);
-          card.style.setProperty("--ry", ry);
-          card.style.transform = "rotateX(" + rx + ") rotateY(" + ry + ")";
-          card.style.setProperty("--shine-x", clamp(50 + x * 4.6, 15, 85).toFixed(1) + "%");
-          card.style.setProperty("--shine-y", clamp(50 - y * 5.2, 15, 85).toFixed(1) + "%");
-        }
+        /* ---------- prompt ---------- */
+        function makePrompt() {
+          var row = document.createElement("div");
+          row.className = "prompt-line";
+          var label = document.createElement("span");
+          label.className = "prompt-label";
+          label.textContent = "visitor@truongid:~$";
+          var input = document.createElement("input");
+          input.className = "cmd-input";
+          input.type = "text";
+          input.setAttribute("aria-label", "Terminal command input");
+          input.setAttribute("autocomplete", "off");
+          input.setAttribute("autocapitalize", "none");
+          input.setAttribute("spellcheck", "false");
+          input.setAttribute("enterkeyhint", "go");
+          var cursor = document.createElement("span");
+          cursor.className = "cursor-block";
+          row.appendChild(label);
+          row.appendChild(input);
+          row.appendChild(cursor);
+          pane.appendChild(row);
+          currentInput = input;
 
-        function resetTilt() {
-          baseline = null;
-          motionBaseline = null;
-          setTilt(0, 0);
-        }
-
-        function handlePointer(event) {
-          if (sensorsEnabled || reduceMotion.matches || event.pointerType === "touch") return;
-          var rect = scene.getBoundingClientRect();
-          var x = (event.clientX - rect.left) / rect.width - 0.5;
-          var y = (event.clientY - rect.top) / rect.height - 0.5;
-          setTilt(x * 11, y * -8);
-        }
-
-        function handleOrientation(event) {
-          if (reduceMotion.matches || event.beta === null || event.gamma === null) return;
-          var reading = mapForScreen(event.gamma, event.beta);
-          lastOrientationAt = Date.now();
-          if (!baseline) baseline = reading;
-          var x = clamp((reading.x - baseline.x) * 0.24, -7, 7);
-          var y = clamp((reading.y - baseline.y) * -0.17, -6, 6);
-          setTilt(x, y);
-        }
-
-        function handleMotion(event) {
-          if (reduceMotion.matches || Date.now() - lastOrientationAt < 500) return;
-          var gravity = event.accelerationIncludingGravity;
-          if (!gravity || gravity.x === null || gravity.y === null || gravity.z === null) return;
-          var roll = Math.atan2(gravity.x, Math.sqrt(gravity.y * gravity.y + gravity.z * gravity.z)) * 180 / Math.PI;
-          var pitch = Math.atan2(gravity.y, Math.sqrt(gravity.x * gravity.x + gravity.z * gravity.z)) * 180 / Math.PI;
-          var reading = mapForScreen(roll, pitch);
-          if (!motionBaseline) motionBaseline = reading;
-          var x = clamp((reading.x - motionBaseline.x) * 0.24, -7, 7);
-          var y = clamp((reading.y - motionBaseline.y) * 0.17, -6, 6);
-          setTilt(x, y);
-        }
-
-        function enableSensors() {
-          if (sensorsEnabled || reduceMotion.matches) return;
-          window.addEventListener("deviceorientation", handleOrientation, true);
-          window.addEventListener("devicemotion", handleMotion, true);
-          sensorsEnabled = true;
-          tiltButton.classList.remove("is-visible");
-          tiltButton.setAttribute("aria-hidden", "true");
-        }
-
-        function markUnavailable() {
-          tiltButton.textContent = "Phone tilt unavailable";
-          tiltButton.disabled = true;
-        }
-
-        function requestSensorPermission() {
-          var requests = [];
-          if (window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission === "function") {
-            requests.push(window.DeviceOrientationEvent.requestPermission());
+          function syncCursor() {
+            cursor.classList.toggle("on", document.activeElement === input && input.value === "");
           }
-          if (window.DeviceMotionEvent && typeof window.DeviceMotionEvent.requestPermission === "function") {
-            requests.push(window.DeviceMotionEvent.requestPermission());
+          input.addEventListener("input", syncCursor);
+          input.addEventListener("focus", syncCursor);
+          input.addEventListener("blur", function () { cursor.classList.remove("on"); });
+          input.addEventListener("keydown", function (ev) {
+            if (ev.key === "Enter") {
+              ev.preventDefault();
+              var value = input.value;
+              /* freeze this prompt line into static scrollback */
+              var echo = document.createElement("span");
+              echo.textContent = value;
+              echo.style.color = "var(--amber-bright)";
+              row.replaceChild(echo, input);
+              cursor.remove();
+              currentInput = null;
+              if (value.trim()) { history.push(value); }
+              histIdx = history.length;
+              run(value);
+            } else if (ev.key === "ArrowUp") {
+              ev.preventDefault();
+              if (histIdx > 0) { histIdx--; input.value = history[histIdx] || ""; syncCursor(); }
+            } else if (ev.key === "ArrowDown") {
+              ev.preventDefault();
+              if (histIdx < history.length) { histIdx++; input.value = history[histIdx] || ""; syncCursor(); }
+            }
+          });
+          scrollEnd();
+          syncCursor();
+          return input;
+        }
+
+        var suppressFocusOnce = false;
+        function focusInput() {
+          if (suppressFocusOnce) { suppressFocusOnce = false; return; }
+          if (currentInput) currentInput.focus({ preventScroll: true });
+        }
+
+        /* ---------- content builders ---------- */
+        function fullName() { return (cfg.firstName + " " + (cfg.lastName || "")).trim(); }
+        function specFlags() {
+          return (cfg.specialties || []).map(function (s) { return "--" + String(s).toLowerCase().replace(/\s+/g, "-"); });
+        }
+        var GLOSSES = {
+          "interfaces": "clean, usable interfaces for web products",
+          "systems": "practical systems that make complicated work feel simple",
+          "operations": "dependable day-to-day running of things"
+        };
+        function gloss(s) { return GLOSSES[String(s).toLowerCase()] || ""; }
+
+        function printMan() {
+          var flags = specFlags();
+          richLine([{ t: "TRUONG(1)", c: "bright" }, { t: "          User Commands          " }, { t: "TRUONG(1)", c: "bright" }]);
+          blank();
+          line("NAME", "bright");
+          line("    " + fullName().toLowerCase().replace(/\.$/, "") + " — " + String(cfg.role).toLowerCase());
+          blank();
+          line("SYNOPSIS", "bright");
+          richLine([{ t: "    truong " }, { t: flags.map(function (f) { return "[" + f + "]"; }).join(" "), c: "bright" }]);
+          blank();
+          line("DESCRIPTION", "bright");
+          line("    " + cfg.statement);
+          blank();
+          line("SPECIALTIES", "bright");
+          (cfg.specialties || []).forEach(function (s, i) {
+            var g = gloss(s);
+            richLine([{ t: "    " + flags[i], c: "bright" }, { t: g ? "  " + g : "" }]);
+          });
+          blank();
+          richLine([{ t: "TRUONG(1)", c: "dim" }, { t: "          " + cfg.portraitCode + " · " + cfg.serial + "          " }, { t: "TRUONG(1)", c: "dim" }]);
+        }
+
+        function printAbout() {
+          richLine([{ t: fullName(), c: "bright" }, { t: " — " + cfg.role }]);
+          line(cfg.statement);
+          line(cfg.eyebrow + " · " + cfg.portraitCode + " · " + cfg.serial, "dim");
+        }
+
+        function printSkills() {
+          (cfg.specialties || []).forEach(function (s, i) {
+            var g = gloss(s);
+            richLine([{ t: specFlags()[i] + "  ", c: "bright" }, { t: s + (g ? " — " + g : "") }]);
+          });
+        }
+
+        function printNeofetch() {
+          richLine([{ t: "truong@truongid", c: "bright" }]);
+          line("----------------");
+          richLine([{ t: "OS: ", c: "bright" }, { t: "truongOS 1.0" }]);
+          richLine([{ t: "Host: ", c: "bright" }, { t: "truongid.com" }]);
+          richLine([{ t: "Shell: ", c: "bright" }, { t: "zsh" }]);
+          richLine([{ t: "Role: ", c: "bright" }, { t: cfg.role }]);
+          richLine([{ t: "Location: ", c: "bright" }, { t: "Santa Ana, CA" }]);
+          richLine([{ t: "Online since: ", c: "bright" }, { t: "2016" }]);
+          richLine([{ t: "Serial: ", c: "bright" }, { t: cfg.serial }]);
+        }
+
+        function printSites() {
+          line("Places I keep up:", "bright");
+          richLine([{ t: "  " }, { t: "truongnpt.com", href: "https://truongnpt.com" }, { t: " — blog, writing & projects" }]);
+          richLine([{ t: "  " }, { t: "guihangmy.com", href: "https://guihangmy.com" }, { t: " — Dino Gửi Hàng Mỹ, proxy shipping US → VN" }]);
+          (cfg.links || []).forEach(function (l) {
+            if (l && l.href && l.label) richLine([{ t: "  " }, { t: l.label, href: l.href }]);
+          });
+        }
+
+        function printHelp() {
+          line("Available commands:", "bright");
+          var rows = [
+            ["man truong", "the full manual page"],
+            ["about", "who I am, short version"],
+            ["skills", "what I work on"],
+            ["neofetch", "system specs, but make it personal"],
+            ["sites", "my places on the web"],
+            ["contact", "how to reach me"],
+            ["joke", "a developer joke"],
+            ["date", "current date & time"],
+            ["clear", "wipe the screen"],
+            ["help", "this list"]
+          ];
+          rows.forEach(function (r) { line("  " + r[0] + " — " + r[1]); });
+          line("A few undocumented ones exist. Geeks tend to find them.", "dim");
+        }
+
+        var JOKES = [
+          "Why do programmers prefer dark mode? Because light attracts bugs.",
+          "There are only 10 types of people: those who understand binary and those who don't.",
+          "Why did the developer go broke? He used up all his cache.",
+          "A SQL query walks into a bar, sees two tables, and asks… “Mind if I join you?”",
+          "!false — it's funny because it's true."
+        ];
+        var jokeIdx = 0;
+
+        /* ---------- command runner ---------- */
+        function done() { makePrompt(); focusInput(); }
+
+        function hack() {
+          var p = line("Hacking the mainframe…");
+          var pct = 0;
+          var timer = setInterval(function () {
+            pct += 10;
+            var filled = Math.round(pct / 10);
+            p.textContent = "Hacking the mainframe… [" + "▓".repeat(filled) + "░".repeat(10 - filled) + "] " + pct + "%";
+            scrollEnd();
+            if (pct >= 100) {
+              clearInterval(timer);
+              richLine([{ t: "Access granted. ", c: "bright" }, { t: "(Not really.)" }]);
+              done();
+            }
+          }, 140);
+        }
+
+        function run(raw) {
+          var input = raw.trim();
+          var lower = input.toLowerCase();
+          if (!input) { done(); return; }
+
+          if (lower.indexOf("sudo") === 0) {
+            line("visitor is not in the sudoers file. This incident will be reported to Truong.", "warn");
+            done(); return;
           }
-          Promise.all(requests).then(function (states) {
-            if (states.every(function (state) { return state === "granted"; })) enableSensors();
-            else markUnavailable();
-          }).catch(markUnavailable);
+          if (lower === "man") { line("What manual page do you want? Try `man truong`."); done(); return; }
+          if (lower === "man truong") { printMan(); done(); return; }
+          if (lower.indexOf("man ") === 0) { line("No manual entry for " + input.slice(4)); done(); return; }
+
+          switch (lower) {
+            case "help": printHelp(); break;
+            case "about": case "whoami": printAbout(); break;
+            case "skills": printSkills(); break;
+            case "neofetch": printNeofetch(); break;
+            case "sites": printSites(); break;
+            case "contact":
+              line("No public inbox.");
+              richLine([{ t: "Try ", c: "dim" }, { t: "sites", c: "bright" }, { t: " for the places I keep up.", c: "dim" }]);
+              break;
+            case "joke":
+              line(JOKES[jokeIdx % JOKES.length]);
+              jokeIdx++;
+              break;
+            case "vim": case "vi": case "emacs":
+              line("Opening vim… just kidding. Nobody ever gets out.");
+              break;
+            case "coffee":
+              line("   ( (");
+              line("    ) )");
+              line("  ┌─────┐");
+              line("  │     │]");
+              line("  └─────┘");
+              line("Error 418: I'm a teapot. The developer, however, runs on coffee.");
+              break;
+            case "hack": hack(); return; /* hack calls done() itself */
+            case "clear":
+              pane.textContent = "";
+              break;
+            case "date":
+              line(new Date().toString().replace(/\s*\(.*\)\s*$/, ""));
+              break;
+            case "exit": case "logout": case "quit":
+              line("logout — just kidding. There's nowhere else to be. Type `help`.");
+              break;
+            case "truong":
+              richLine([{ t: "That's me. Try " }, { t: "man truong", c: "bright" }, { t: "." }]);
+              break;
+            default:
+              line("zsh: command not found: " + input + " — type `help`.");
+          }
+          done();
         }
 
-        scene.addEventListener("pointermove", handlePointer);
-        scene.addEventListener("pointerleave", function () {
-          if (!sensorsEnabled) setTilt(0, 0);
-        });
-        window.addEventListener("orientationchange", resetTilt);
-        document.addEventListener("visibilitychange", function () {
-          if (!document.hidden) resetTilt();
-        });
-
-        var needsPermission =
-          (window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission === "function") ||
-          (window.DeviceMotionEvent && typeof window.DeviceMotionEvent.requestPermission === "function");
-
-        if (needsPermission && !reduceMotion.matches) {
-          tiltButton.classList.add("is-visible");
-          tiltButton.addEventListener("click", requestSensorPermission);
-        } else if ((window.DeviceOrientationEvent || window.DeviceMotionEvent) && !reduceMotion.matches) {
-          enableSensors();
+        /* ---------- boot ---------- */
+        function bootLines() {
+          var mods = (cfg.specialties || []).map(function (s) { return String(s).toLowerCase(); }).join(" · ");
+          var loginDate = new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+          return [
+            function () { line("truongOS 1.0 — booting"); },
+            function () { richLine([{ t: "[ OK ] ", c: "bright" }, { t: "Mounted /dev/identity" }]); },
+            function () { richLine([{ t: "[ OK ] ", c: "bright" }, { t: "Loaded modules: " + mods }]); },
+            function () { richLine([{ t: "[ OK ] ", c: "bright" }, { t: "Started truong.service — " + String(cfg.role).toLowerCase() }]); },
+            function () { line("Last login: " + loginDate + " from Santa Ana, CA", "dim"); },
+            function () {
+              blank();
+              richLine([{ t: "Welcome to truongOS 1.0", c: "bright" }]);
+              var nameRow = richLine([{ t: fullName().toUpperCase() + " — " + cfg.role, c: "bright" }]);
+              nameRow.className = "motd-name";
+              line(cfg.statement);
+              line(cfg.eyebrow + " · " + cfg.portraitCode + " · " + cfg.serial, "dim");
+              blank();
+              richLine([{ t: "New here? Type " }, { t: "help", c: "bright" }, { t: ", or tap a command below." }]);
+            }
+          ];
         }
 
-        reduceMotion.addEventListener("change", function (event) {
-          if (event.matches) resetTilt();
-          else if (!needsPermission) enableSensors();
+        function boot() {
+          if (booted) return;
+          booted = true;
+          var steps = bootLines();
+          if (reduceMotion) {
+            steps.forEach(function (fn) { fn(); });
+            makePrompt();
+            return;
+          }
+          var delays = [60, 320, 580, 840, 1100, 1420];
+          var timers = [];
+          var printed = 0;
+          steps.forEach(function (fn, i) {
+            timers.push(setTimeout(function () {
+              if (bootSkipped || i < printed) return;
+              fn();
+              printed = i + 1;
+              if (i === steps.length - 1) makePrompt();
+            }, delays[i] || 1400));
+          });
+          function skip() {
+            if (bootSkipped) return;
+            bootSkipped = true;
+            timers.forEach(clearTimeout);
+            for (var i = printed; i < steps.length; i++) steps[i]();
+            makePrompt();
+          }
+          window.addEventListener("pointerdown", function h() { skip(); window.removeEventListener("pointerdown", h); });
+          window.addEventListener("keydown", function h() { skip(); window.removeEventListener("keydown", h); });
+          setTimeout(function () { /* safety: prompt by ~2.1s even if a step was skipped */ if (!currentInput && !bootSkipped) { /* steps handle it */ } }, 2200);
+        }
+
+        /* ---------- wiring ---------- */
+        document.querySelectorAll(".chip").forEach(function (chip) {
+          chip.addEventListener("click", function () {
+            if (!currentInput) return;
+            suppressFocusOnce = true; /* don't pop the keyboard after a chip tap */
+            var cmd = chip.getAttribute("data-cmd");
+            currentInput.value = cmd;
+            var ev = new KeyboardEvent("keydown", { key: "Enter" });
+            currentInput.dispatchEvent(ev);
+          });
         });
-      }());
+
+        stage.addEventListener("click", function (ev) {
+          if (ev.target.closest("a") || ev.target.closest("button")) return;
+          focusInput();
+        });
+
+        if (window.visualViewport) {
+          var vv = window.visualViewport;
+          var applyVv = function () { stage.style.height = vv.height + "px"; };
+          vv.addEventListener("resize", applyVv);
+          applyVv();
+        }
+
+        /* ---------- config first (fast), then boot ---------- */
+        var bootStarted = false;
+        function start() { if (!bootStarted) { bootStarted = true; boot(); } }
+        fetch("id-config.json", { cache: "no-store" })
+          .then(function (res) { if (!res.ok) throw new Error("no config"); return res.json(); })
+          .then(function (data) {
+            cfg = Object.assign({}, DEFAULTS, data || {});
+            if (cfg.pageTitle) document.title = cfg.pageTitle;
+          })
+          .catch(function () {})
+          .then(start);
+        setTimeout(start, 700);
+      })();
     </script>
   </body>
 </html>
