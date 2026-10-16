@@ -196,7 +196,7 @@
 
       @media (max-width: 640px) {
         .pane { font-size: 13px; padding: 13px 13px 8px; }
-        .pane .ascii { font-size: 8px; }
+        .pane .ascii { font-size: 6px; }
         .titlebar .tt { margin-right: 0; text-align: left; padding-left: 6px; }
         .window { height: 100%; border-radius: 10px; }
       }
@@ -725,32 +725,29 @@
         }
 
         /* ---------- boot ---------- */
-        var ASCII_FONT = {
-          T: ["█████", "  █  ", "  █  ", "  █  ", "  █  "],
-          R: ["████ ", "█   █", "████ ", "█ █  ", "█  █ "],
-          U: ["█   █", "█   █", "█   █", "█   █", " ███ "],
-          O: [" ███ ", "█   █", "█   █", "█   █", " ███ "],
-          N: ["█   █", "██  █", "█ █ █", "█  ██", "█   █"],
-          G: [" ████", "█    ", "█  ██", "█   █", " ████"],
-          I: ["█████", "  █  ", "  █  ", "  █  ", "█████"],
-          D: ["████ ", "█   █", "█   █", "█   █", "████ "]
-        };
-        function asciiWord(word) {
-          var rows = ["", "", "", "", ""];
-          word.toUpperCase().split("").forEach(function (ch, idx) {
-            var glyph = ASCII_FONT[ch];
-            if (!glyph) return;
-            for (var r = 0; r < 5; r++) rows[r] += (idx ? " " : "") + glyph[r];
-          });
-          return rows.join("\n");
-        }
+        /* "truongOS" in the big_money-se figlet style ($ clusters),
+           matching the reference the owner supplied. */
+        var ART_LINES = [
+          "   __                                                         ______    ______",
+          "  |  \\                                                       /      \\  /      \\",
+          " _| $$_     ______   __    __   ______   _______    ______  |  $$$$$$\\|  $$$$$$\\",
+          "|   $$ \\   /      \\ |  \\  |  \\ /      \\ |       \\  /      \\ | $$  | $$| $$___\\$$",
+          " \\$$$$$$  |  $$$$$$\\| $$  | $$|  $$$$$$\\| $$$$$$$\\|  $$$$$$\\| $$  | $$ \\$$    \\",
+          "  | $$ __ | $$   \\$$| $$  | $$| $$  | $$| $$  | $$| $$  | $$| $$  | $$ _\\$$$$$$\\",
+          "  | $$|  \\| $$      | $$__/ $$| $$__/ $$| $$  | $$| $$__| $$| $$__/ $$|  \\__| $$",
+          "   \\$$  $$| $$       \\$$    $$ \\$$    $$| $$  | $$ \\$$    $$ \\$$    $$ \\$$    $$",
+          "    \\$$$$  \\$$        \\$$$$$$   \\$$$$$$  \\$$   \\$$ _\\$$$$$$$  \\$$$$$$   \\$$$$$$",
+          "                                                  |  \\__| $$",
+          "                                                   \\$$    $$",
+          "                                                    \\$$$$$$"
+        ];
 
         /* Minimal boot: one sentence + the ASCII wordmark. Everything else
            about Truong is discovered through commands. */
         function bootLines() {
           return [
             function () { line("Welcome to truongOS 1.0", "bright"); },
-            function () { line(asciiWord("TRUONGID"), "ascii"); }
+            function () { line(ART_LINES.join("\n"), "ascii"); }
           ];
         }
 
