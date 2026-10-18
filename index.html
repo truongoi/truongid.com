@@ -647,6 +647,17 @@
         function fmtMoney(n) { return "$" + Number(n).toFixed(2); }
         function fmtKwh(n) { return Number(n).toFixed(2) + " kWh"; }
         function sessWord(n) { return n === 1 ? "session" : "sessions"; }
+        /* ISO 8601 week number — weeks run Monday to Sunday. */
+        function isoWeek(dateStr) {
+          var p = dateStr.split("-");
+          var d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));
+          var day = (d.getUTCDay() + 6) % 7; /* Mon=0 … Sun=6 */
+          d.setUTCDate(d.getUTCDate() - day + 3); /* Thursday of this week */
+          var firstThu = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+          var fday = (firstThu.getUTCDay() + 6) % 7;
+          firstThu.setUTCDate(firstThu.getUTCDate() - fday + 3);
+          return 1 + Math.round((d - firstThu) / (7 * 24 * 3600 * 1000));
+        }
 
         function printEv(d) {
           richLine([{ t: "Home EV charging", c: "bright" }, { t: " \u2014 updated " + d.updatedAt + " \u00b7 rate $" + Number(d.ratePerKwh).toFixed(2) + "/kWh", c: "dim" }]);
@@ -655,13 +666,14 @@
           var sessions = d.sessions || [];
           sessions.slice(-5).reverse().forEach(function (s) {
             var pct = (s.startPct === null || s.startPct === undefined) ? "\u2014" : (s.startPct + "%\u2192" + s.endPct + "%");
-            line("  " + s.date + "  " + pct + "  " + fmtKwh(s.kwh) + "  " + fmtMoney(s.cost));
+            line("  " + s.date + "  " + pct + "  " + fmtKwh(s.kwh) + "  " + fmtMoney(s.cost) + "  \u00b7 W" + isoWeek(s.date));
           });
           blank();
           var cw = d.currentWeek || {};
           var oct = (d.totals || {}).october || {};
           var all = (d.totals || {}).allTime || {};
-          line("This week: " + fmtKwh(cw.kwh) + " \u00b7 " + fmtMoney(cw.cost) + " (" + cw.sessions + " " + sessWord(cw.sessions) + ")");
+          var cwLabel = cw.isoWeek ? "This week (W" + String(cw.isoWeek).split("-W")[1] + ")" : "This week";
+          line(cwLabel + ": " + fmtKwh(cw.kwh) + " \u00b7 " + fmtMoney(cw.cost) + " (" + cw.sessions + " " + sessWord(cw.sessions) + ")");
           line("October 2026: " + fmtKwh(oct.kwh) + " \u00b7 " + fmtMoney(oct.cost) + " (" + oct.sessions + " " + sessWord(oct.sessions) + ")");
           line("All time: " + fmtKwh(all.kwh) + " \u00b7 " + fmtMoney(all.cost) + " (" + all.sessions + " " + sessWord(all.sessions) + ")");
           blank();
