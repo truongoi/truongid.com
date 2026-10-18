@@ -489,6 +489,12 @@
             ["help", "this list"]
           ];
           rows.forEach(function (r) { line("  " + r[0] + " — " + r[1]); });
+          if (isAdmin()) {
+            blank();
+            line("Admin commands:", "bright");
+            line("  ev — home EV charging history + dashboard link");
+            line("  logout — end the admin session");
+          }
           line("Start typing and the terminal suggests. Some commands stay undocumented.", "dim");
         }
 
@@ -505,13 +511,182 @@
            Order matters: the first prefix match wins. */
         var HINTS = [
           "help", "man truong", "about", "whoami", "skills", "neofetch",
-          "sites", "arcade", "contact", "joke", "date", "clear", "exit", "history",
+          "sites", "arcade", "contact", "joke", "date", "clear", "exit", "history", "login",
           "sudo", "hack", "coffee", "vim",
           "rm -rf /", "reboot", "shutdown", "poweroff", "yes",
           "kill -9 1", "killall", "mkfs.ext4 /dev/sda",
           "dd if=/dev/zero of=/dev/sda", "chmod -R 000 /",
           "history -c", "format c:", ":(){ :|:& };:"
         ];
+
+        /* ---------- admin session (login / ev / logout) ----------
+           The password is verified server-side by /api/login against an
+           env secret; the page only ever holds the returned signed token
+           (sessionStorage, 12h). The dashboard slug is likewise only ever
+           handed out by /api/ev after the token checks out. */
+        var ADMIN_TOKEN_KEY = "truongos.adminToken";
+
+        function adminToken() {
+          try { return window.sessionStorage.getItem(ADMIN_TOKEN_KEY); } catch (e) { return null; }
+        }
+        function clearAdmin() {
+          try { window.sessionStorage.removeItem(ADMIN_TOKEN_KEY); } catch (e) {}
+        }
+        function isAdmin() {
+          var t = adminToken();
+          if (!t) return false;
+          try {
+            var seg = t.split(".")[0].replace(/-/g, "+").replace(/_/g, "/");
+            var payload = JSON.parse(window.atob(seg));
+            if (!payload.exp || payload.exp * 1000 <= Date.now()) { clearAdmin(); return false; }
+            return true;
+          } catch (e) { return false; }
+        }
+        /* Print through the normal slow-playback queue, then a fresh prompt. */
+        function collectOut(fn) { outQueue = []; fn(); finish(); }
+
+        function makePasswordPrompt(onSubmit) {
+          var row = document.createElement("div");
+          row.className = "prompt-line";
+          var label = document.createElement("span");
+          label.className = "prompt-label";
+          label.textContent = "password:";
+          var input = document.createElement("input");
+          input.className = "cmd-input";
+          input.type = "password";
+          input.setAttribute("aria-label", "Admin password");
+          input.setAttribute("autocomplete", "off");
+          input.setAttribute("autocapitalize", "none");
+          input.setAttribute("spellcheck", "false");
+          input.setAttribute("enterkeyhint", "go");
+          var wrap = document.createElement("div");
+          wrap.className = "input-wrap";
+          wrap.appendChild(input);
+          var cursor = document.createElement("span");
+          cursor.className = "cursor-block";
+          row.appendChild(label);
+          row.appendChild(wrap);
+          row.appendChild(cursor);
+          pane.appendChild(row);
+          currentInput = input;
+
+          var measureCtx = document.createElement("canvas").getContext("2d");
+          function placeCursor() {
+            if (document.activeElement !== input || input.selectionStart !== input.selectionEnd) {
+              cursor.classList.remove("on");
+              return;
+            }
+            measureCtx.font = window.getComputedStyle(input).font;
+            var w = measureCtx.measureText("\u2022".repeat(input.selectionStart)).width;
+            cursor.style.left = (label.offsetWidth + 8 + w) + "px";
+            cursor.classList.add("on");
+          }
+          input.addEventListener("input", placeCursor);
+          input.addEventListener("keyup", placeCursor);
+          input.addEventListener("click", placeCursor);
+          input.addEventListener("focus", placeCursor);
+          input.addEventListener("blur", function () { cursor.classList.remove("on"); });
+          input.addEventListener("keydown", function (ev) {
+            if (ev.key === "Enter") {
+              ev.preventDefault();
+              var value = input.value;
+              var echo = document.createElement("span");
+              echo.textContent = "\u2022".repeat(value.length);
+              echo.style.color = "var(--amber-bright)";
+              wrap.replaceChild(echo, input);
+              cursor.remove();
+              currentInput = null;
+              onSubmit(value);
+            } else if (ev.key === "c" && (ev.ctrlKey || ev.metaKey)) {
+              ev.preventDefault();
+              var echo2 = document.createElement("span");
+              echo2.textContent = "^C";
+              echo2.style.color = "var(--amber-bright)";
+              wrap.replaceChild(echo2, input);
+              cursor.remove();
+              currentInput = null;
+              collectOut(function () { line("login cancelled.", "dim"); });
+            }
+          });
+          scrollEnd();
+          placeCursor();
+          input.focus({ preventScroll: true });
+          return input;
+        }
+
+        function startLogin() {
+          makePasswordPrompt(function (pw) {
+            if (!pw) { collectOut(function () { line("login cancelled.", "dim"); }); return; }
+            line("verifying\u2026", "dim");
+            fetch("/api/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password: pw })
+            }).then(function (res) {
+              return res.json().catch(function () { return {}; }).then(function (data) { return { res: res, data: data }; });
+            }).then(function (r) {
+              if (r.res.ok && r.data.token) {
+                try { window.sessionStorage.setItem(ADMIN_TOKEN_KEY, r.data.token); } catch (e) {}
+                collectOut(function () {
+                  line("Welcome back, admin.", "bright");
+                  line("Admin commands unlocked \u2014 `ev` and `logout`. `help` shows them now.", "dim");
+                });
+              } else if (r.res.status === 503) {
+                collectOut(function () { line("admin not configured yet \u2014 ADMIN_PASSWORD is not set on the server.", "warn"); });
+              } else if (r.res.status === 401) {
+                collectOut(function () { line("login: incorrect password.", "warn"); });
+              } else {
+                collectOut(function () { line("login failed (HTTP " + r.res.status + ").", "warn"); });
+              }
+            }).catch(function () {
+              collectOut(function () { line("login failed \u2014 could not reach the server.", "warn"); });
+            });
+          });
+        }
+
+        function fmtMoney(n) { return "$" + Number(n).toFixed(2); }
+        function fmtKwh(n) { return Number(n).toFixed(2) + " kWh"; }
+        function sessWord(n) { return n === 1 ? "session" : "sessions"; }
+
+        function printEv(d) {
+          richLine([{ t: "Home EV charging", c: "bright" }, { t: " \u2014 updated " + d.updatedAt + " \u00b7 rate $" + Number(d.ratePerKwh).toFixed(2) + "/kWh", c: "dim" }]);
+          blank();
+          line("Last sessions:", "bright");
+          var sessions = d.sessions || [];
+          sessions.slice(-5).reverse().forEach(function (s) {
+            var pct = (s.startPct === null || s.startPct === undefined) ? "\u2014" : (s.startPct + "%\u2192" + s.endPct + "%");
+            line("  " + s.date + "  " + pct + "  " + fmtKwh(s.kwh) + "  " + fmtMoney(s.cost));
+          });
+          blank();
+          var cw = d.currentWeek || {};
+          var oct = (d.totals || {}).october || {};
+          var all = (d.totals || {}).allTime || {};
+          line("This week: " + fmtKwh(cw.kwh) + " \u00b7 " + fmtMoney(cw.cost) + " (" + cw.sessions + " " + sessWord(cw.sessions) + ")");
+          line("October 2026: " + fmtKwh(oct.kwh) + " \u00b7 " + fmtMoney(oct.cost) + " (" + oct.sessions + " " + sessWord(oct.sessions) + ")");
+          line("All time: " + fmtKwh(all.kwh) + " \u00b7 " + fmtMoney(all.cost) + " (" + all.sessions + " " + sessWord(all.sessions) + ")");
+          blank();
+          richLine([{ t: "Mom's dashboard: " }, { t: d.dashboardUrl, href: d.dashboardUrl }]);
+        }
+
+        function runEv() {
+          fetch("/api/ev", { headers: { "Authorization": "Bearer " + adminToken() } })
+            .then(function (res) {
+              return res.json().catch(function () { return {}; }).then(function (data) { return { res: res, data: data }; });
+            })
+            .then(function (r) {
+              if (r.res.status === 401) {
+                clearAdmin();
+                collectOut(function () { line("session expired \u2014 login again.", "warn"); });
+              } else if (!r.res.ok) {
+                collectOut(function () { line("couldn't load EV data (HTTP " + r.res.status + ").", "warn"); });
+              } else {
+                collectOut(function () { printEv(r.data); });
+              }
+            })
+            .catch(function () {
+              collectOut(function () { line("couldn't load EV data \u2014 connection problem.", "warn"); });
+            });
+        }
 
         /* ---------- command runner ---------- */
         function done() { makePrompt(); focusInput(); }
@@ -680,6 +855,20 @@
             else history.forEach(function (h, i) { line("  " + (i + 1) + "  " + h); });
             finish(); return;
           }
+
+          /* admin commands — `ev` stays invisible until login, and `logout`
+             only means something with a live session (else the gag below) */
+          if (lower === "login") {
+            if (isAdmin()) { line("Already logged in. `ev` is ready; `logout` ends the session."); finish(); }
+            else { outQueue = null; startLogin(); }
+            return;
+          }
+          if (isAdmin() && lower === "logout") {
+            clearAdmin();
+            line("Logged out \u2014 admin commands locked.");
+            finish(); return;
+          }
+          if (isAdmin() && lower === "ev") { outQueue = null; runEv(); return; }
 
           switch (lower) {
             case "help": printHelp(); break;
