@@ -333,31 +333,41 @@
       }
       .memcard {
         aspect-ratio: 3 / 4;
-        border: none;
-        background: none;
+        width: 100%;
+        display: block;
         padding: 0;
         cursor: pointer;
-        perspective: 600px;
+        appearance: none;
+        -webkit-appearance: none;
+        border-radius: 14px;
+        border: 2px solid var(--amber-soft);
+        background: linear-gradient(160deg, #6b4423, #3a2a18);
         touch-action: manipulation;
         user-select: none;
         -webkit-user-select: none;
+        transition: background .2s ease, box-shadow .2s ease, border-color .2s ease;
+      }
+      .memcard.flipped {
+        background: linear-gradient(160deg, #fff3d6, #ffe1a1);
+      }
+      .memcard.matched {
+        border-color: var(--good);
+        box-shadow: 0 0 0 3px rgba(127, 176, 105, .55);
+        animation: pop .35s ease;
       }
       .memcard .inner {
-        position: relative;
+        display: grid;
         width: 100%;
         height: 100%;
       }
       .memcard .face {
-        position: absolute;
-        inset: 0;
+        grid-area: 1 / 1;
         display: grid;
         place-items: center;
-        border-radius: 14px;
+        border-radius: 12px;
         transition: opacity .18s ease, transform .22s ease;
       }
       .memcard .front {
-        background: linear-gradient(160deg, #6b4423, #3a2a18);
-        border: 2px solid var(--amber-soft);
         color: var(--amber-bright);
         font-family: var(--kid);
         font-size: 34px;
@@ -365,16 +375,12 @@
       }
       .memcard.flipped .front { opacity: 0; transform: scale(.55) rotate(8deg); }
       .memcard .back {
-        background: linear-gradient(160deg, #fff3d6, #ffe1a1);
         font-size: 44px;
-        border: 2px solid var(--amber-soft);
         opacity: 0;
         transform: scale(.55) rotate(-8deg);
         transition-delay: .1s;
       }
       .memcard.flipped .back { opacity: 1; transform: scale(1) rotate(0deg); }
-      .memcard.matched .back { border-color: var(--good); box-shadow: 0 0 0 3px rgba(127, 176, 105, .55); }
-      .memcard.matched { animation: pop .35s ease; }
 
       /* ---- Word Cards ---- */
       .wordcard {
