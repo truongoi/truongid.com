@@ -666,7 +666,12 @@
           var sessions = d.sessions || [];
           sessions.slice(-5).reverse().forEach(function (s) {
             var pct = (s.startPct === null || s.startPct === undefined) ? "\u2014" : (s.startPct + "%\u2192" + s.endPct + "%");
-            line("  W" + isoWeek(s.date) + "  " + s.date + "  " + pct + "  " + fmtKwh(s.kwh) + "  " + fmtMoney(s.cost));
+            while (pct.length < 7) pct += " ";
+            var kwh = Number(s.kwh).toFixed(2);
+            while (kwh.length < 5) kwh = " " + kwh;
+            var amt = fmtMoney(s.cost);
+            while (amt.length < 6) amt = " " + amt;
+            line("  W" + isoWeek(s.date) + "  " + s.date + "  " + pct + "  " + kwh + " kWh  " + amt);
           });
           blank();
           var cw = d.currentWeek || {};
