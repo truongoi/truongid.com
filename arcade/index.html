@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#14100c" />
+    <link rel="icon" href="data:," />
+    <title>MINH'S ARCADE — truongOS</title>
+    <meta name="description" content="Minh's Arcade — a secret games room inside truongOS. Math, memory and word games for Minh." />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #14100c;
+        --win: #1a140e;
+        --win-edge: #3a2c1c;
+        --bar: #241b12;
+        --amber: #f0a840;
+        --amber-bright: #ffd479;
+        --amber-soft: #d99a35;
+        --amber-dim: #9a7434;
+        --ink: #fff6e5;
+        --pink: #ff7eb6;
+        --sky: #6ec6ff;
+        --lime: #a8e063;
+        --grape: #b39dfa;
+        --good: #7fb069;
+        --bad: #ff8a66;
+        --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        --kid: "Arial Rounded MT Bold", "Helvetica Rounded", ui-rounded, "Segoe UI", system-ui, sans-serif;
+      }
+
+      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+      html, body { height: 100%; }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--amber);
+        font-family: var(--mono);
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .stage {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+        background:
+          radial-gradient(120% 90% at 50% 0%, rgba(240, 168, 64, 0.07), transparent 60%),
+          var(--bg);
+      }
+
+      .window {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: min(480px, 100%);
+        height: min(780px, 100%);
+        background: var(--win);
+        border: 1px solid var(--win-edge);
+        border-radius: 14px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 2px 0 rgba(255, 212, 121, 0.05) inset;
+        overflow: hidden;
+      }
+
+      .titlebar {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 14px;
+        background: var(--bar);
+        border-bottom: 1px solid var(--win-edge);
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .dot { width: 12px; height: 12px; border-radius: 50%; flex: 0 0 auto; }
+      .dot.r { background: #e0654f; }
+      .dot.y { background: #e8b34b; }
+      .dot.g { background: #7fb069; }
+
+      .titlebar .tt {
+        flex: 1 1 auto;
+        text-align: center;
+        font-size: 12.5px;
+        color: var(--amber-dim);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: 52px;
+      }
+
+      .screen {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 16px 16px 22px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--win-edge) transparent;
+      }
+      .screen::-webkit-scrollbar { width: 8px; }
+      .screen::-webkit-scrollbar-thumb { background: var(--win-edge); border-radius: 4px; }
+
+      .promptline {
+        font-size: 13px;
+        color: var(--amber-dim);
+        margin: 0 0 14px;
+        word-break: break-all;
+      }
+      .promptline .u { color: var(--amber-bright); }
+      .promptline .cmd { color: var(--ink); }
+
+      h1.logo {
+        font-family: var(--kid);
+        text-align: center;
+        font-size: 34px;
+        line-height: 1.15;
+        margin: 4px 0 2px;
+        color: var(--amber-bright);
+        letter-spacing: 1px;
+        text-shadow: 0 3px 0 rgba(0,0,0,.35);
+      }
+      .logo .m1 { color: var(--pink); }
+      .logo .m2 { color: var(--sky); }
+      .logo .m3 { color: var(--lime); }
+      .logo .m4 { color: var(--grape); }
+
+      .tagline {
+        text-align: center;
+        font-family: var(--kid);
+        color: var(--amber);
+        font-size: 16px;
+        margin: 0 0 18px;
+      }
+
+      .view { display: none; }
+      .view.on { display: block; animation: fadein .25s ease; }
+      @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+      /* ---- big kid buttons ---- */
+      .bigbtn {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        width: 100%;
+        min-height: 84px;
+        margin: 0 0 14px;
+        padding: 16px 18px;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-family: var(--kid);
+        text-align: left;
+        color: #221503;
+        box-shadow: 0 5px 0 rgba(0,0,0,.35);
+        transition: transform .08s ease, box-shadow .08s ease;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .bigbtn:active { transform: translateY(3px) scale(.99); box-shadow: 0 2px 0 rgba(0,0,0,.35); }
+      .bigbtn .ic { font-size: 42px; line-height: 1; flex: 0 0 auto; }
+      .bigbtn .tx { flex: 1 1 auto; }
+      .bigbtn .tx .t1 { display: block; font-size: 23px; line-height: 1.15; }
+      .bigbtn .tx .t2 { display: block; font-size: 14px; opacity: .75; margin-top: 2px; }
+      .bigbtn.pink  { background: linear-gradient(180deg, #ffa4cd, var(--pink)); }
+      .bigbtn.sky   { background: linear-gradient(180deg, #a5dcff, var(--sky)); }
+      .bigbtn.lime  { background: linear-gradient(180deg, #c6ef8f, var(--lime)); }
+      .bigbtn.amber { background: linear-gradient(180deg, var(--amber-bright), var(--amber)); }
+
+      .backbtn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 52px;
+        padding: 10px 18px;
+        margin: 0 0 14px;
+        border: 2px solid var(--win-edge);
+        border-radius: 999px;
+        background: var(--bar);
+        color: var(--amber-bright);
+        font-family: var(--kid);
+        font-size: 17px;
+        cursor: pointer;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .backbtn:active { transform: scale(.97); }
+
+      .gametitle {
+        font-family: var(--kid);
+        font-size: 27px;
+        text-align: center;
+        margin: 0 0 4px;
+        color: var(--ink);
+      }
+      .gamesub {
+        text-align: center;
+        font-family: var(--kid);
+        font-size: 15px;
+        color: var(--amber-soft);
+        margin: 0 0 16px;
+      }
+
+      /* ---- score board ---- */
+      .board {
+        border: 1px dashed var(--amber-dim);
+        border-radius: 16px;
+        padding: 14px 16px 8px;
+        margin: 20px 0 6px;
+        background: rgba(240, 168, 64, 0.05);
+      }
+      .board h2 {
+        font-family: var(--kid);
+        font-size: 18px;
+        margin: 0 0 10px;
+        color: var(--amber-bright);
+        text-align: center;
+      }
+      .board .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-size: 14px;
+        padding: 7px 2px;
+        border-top: 1px dotted rgba(154, 116, 52, .45);
+        color: var(--amber);
+      }
+      .board .row:first-of-type { border-top: none; }
+      .board .row b { color: var(--ink); font-size: 16px; }
+
+      .exitline {
+        margin: 16px 0 0;
+        text-align: center;
+        font-size: 12.5px;
+        color: var(--amber-dim);
+      }
+      .exitline .cmd { color: var(--amber-bright); }
+
+      /* ---- status strip inside games ---- */
+      .status {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin: 0 0 14px;
+      }
+      .chip {
+        flex: 1 1 0;
+        text-align: center;
+        background: var(--bar);
+        border: 1px solid var(--win-edge);
+        border-radius: 12px;
+        padding: 8px 4px;
+        font-size: 12px;
+        color: var(--amber-dim);
+      }
+      .chip b { display: block; font-size: 20px; color: var(--ink); font-family: var(--kid); }
+
+      .feedback {
+        min-height: 30px;
+        text-align: center;
+        font-family: var(--kid);
+        font-size: 20px;
+        margin: 10px 0 4px;
+        color: var(--amber-bright);
+      }
+      .feedback.good { color: var(--lime); }
+      .feedback.oops { color: var(--bad); }
+
+      /* ---- Math Dash ---- */
+      .question {
+        font-family: var(--kid);
+        text-align: center;
+        font-size: 62px;
+        color: var(--ink);
+        margin: 14px 0 20px;
+        letter-spacing: 2px;
+      }
+      .answers {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .ansbtn {
+        min-height: 84px;
+        border: none;
+        border-radius: 20px;
+        background: linear-gradient(180deg, #ffe9b8, var(--amber-bright));
+        color: #221503;
+        font-family: var(--kid);
+        font-size: 38px;
+        cursor: pointer;
+        box-shadow: 0 5px 0 rgba(0,0,0,.35);
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+        transition: transform .08s ease, background .15s ease;
+      }
+      .ansbtn:active { transform: scale(.97); }
+      .ansbtn.right { background: linear-gradient(180deg, #c6ef8f, var(--lime)); }
+      .ansbtn.wrong { background: linear-gradient(180deg, #ffb59d, var(--bad)); animation: shake .35s ease; }
+      .ansbtn:disabled { opacity: .92; cursor: default; }
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-7px); }
+        75% { transform: translateX(7px); }
+      }
+      .pop { animation: pop .35s ease; }
+      @keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+
+      .endbox { text-align: center; padding: 10px 0 4px; }
+      .endbox .stars { font-size: 46px; letter-spacing: 6px; margin: 6px 0; }
+      .endbox .big { font-family: var(--kid); font-size: 26px; color: var(--ink); margin: 4px 0; }
+      .endbox .small { font-family: var(--kid); font-size: 16px; color: var(--amber-soft); margin: 0 0 18px; }
+
+      /* ---- Memory Match ---- */
+      .memgrid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin: 6px 0 8px;
+      }
+      .memcard {
+        aspect-ratio: 3 / 4;
+        border: none;
+        background: none;
+        padding: 0;
+        cursor: pointer;
+        perspective: 600px;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .memcard .inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        transition: transform .38s ease;
+      }
+      .memcard.flipped .inner { transform: rotateY(180deg); }
+      .memcard .face {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+      }
+      .memcard .front {
+        background: linear-gradient(160deg, #3a2a18, var(--bar));
+        border: 2px solid var(--win-edge);
+        color: var(--amber);
+        font-family: var(--mono);
+        font-size: 30px;
+        font-weight: 700;
+      }
+      .memcard .back {
+        background: linear-gradient(160deg, #fff3d6, #ffe1a1);
+        transform: rotateY(180deg);
+        font-size: 40px;
+        border: 2px solid var(--amber-soft);
+      }
+      .memcard.matched .back { border-color: var(--good); box-shadow: 0 0 0 3px rgba(127, 176, 105, .55); }
+      .memcard.matched { animation: pop .35s ease; }
+
+      /* ---- Word Cards ---- */
+      .wordcard {
+        width: 100%;
+        min-height: 250px;
+        border: none;
+        border-radius: 24px;
+        cursor: pointer;
+        padding: 22px 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 6px 0 rgba(0,0,0,.35);
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+        transition: transform .12s ease, background .2s ease;
+      }
+      .wordcard:active { transform: scale(.985); }
+      .wordcard.en { background: linear-gradient(165deg, #a5dcff, var(--sky)); color: #0b2a44; }
+      .wordcard.vi { background: linear-gradient(165deg, #c6ef8f, var(--lime)); color: #1d3005; }
+      .wordcard .art { font-size: 92px; line-height: 1.1; }
+      .wordcard .w { font-family: var(--kid); font-size: 42px; line-height: 1.1; }
+      .wordcard .hint { font-family: var(--kid); font-size: 14px; opacity: .7; }
+      .wordcard .cat { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; opacity: .65; }
+
+      .wordnav {
+        display: flex;
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .navbtn {
+        flex: 1 1 0;
+        min-height: 64px;
+        border: none;
+        border-radius: 18px;
+        font-family: var(--kid);
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 4px 0 rgba(0,0,0,.35);
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .navbtn:active { transform: translateY(2px); }
+      .navbtn.say { background: linear-gradient(180deg, var(--amber-bright), var(--amber)); color: #221503; }
+      .navbtn.move { background: var(--bar); color: var(--amber-bright); border: 2px solid var(--win-edge); box-shadow: none; font-size: 30px; }
+
+      .againbtn {
+        display: block;
+        width: 100%;
+        min-height: 68px;
+        border: none;
+        border-radius: 18px;
+        background: linear-gradient(180deg, #c6ef8f, var(--lime));
+        color: #1d3005;
+        font-family: var(--kid);
+        font-size: 22px;
+        cursor: pointer;
+        box-shadow: 0 5px 0 rgba(0,0,0,.35);
+        touch-action: manipulation;
+      }
+      .againbtn:active { transform: translateY(3px); }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <div class="window">
+        <div class="titlebar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="tt">truongOS — arcade — minh</span>
+        </div>
+        <div class="screen">
+          <p class="promptline"><span class="u">minh@truongOS</span>:<span class="u">~/arcade</span>$ <span class="cmd">./open-arcade</span> 🎮</p>
+
+          <!-- ============ HOME ============ -->
+          <section class="view on" id="view-home">
+            <h1 class="logo"><span class="m1">M</span><span class="m2">I</span><span class="m3">N</span><span class="m4">H</span>'S ARCADE</h1>
+            <p class="tagline">Phòng game của Minh 🚀 Pick a game!</p>
+
+            <button class="bigbtn pink" data-goto="math">
+              <span class="ic">🔢</span>
+              <span class="tx"><span class="t1">Math Dash</span><span class="t2">Đua tính nhẩm · Add &amp; subtract race!</span></span>
+            </button>
+            <button class="bigbtn sky" data-goto="memory">
+              <span class="ic">🃏</span>
+              <span class="tx"><span class="t1">Memory Match</span><span class="t2">Trí nhớ siêu phàm · Find the pairs!</span></span>
+            </button>
+            <button class="bigbtn lime" data-goto="words">
+              <span class="ic">🦁</span>
+              <span class="tx"><span class="t1">Word Cards</span><span class="t2">Học từ vựng · English ↔ Tiếng Việt</span></span>
+            </button>
+
+            <div class="board">
+              <h2>🏆 BẢNG ĐIỂM · MINH'S SCORES</h2>
+              <div class="row"><span>🔢 Math Dash — best round</span><b id="score-math">—</b></div>
+              <div class="row"><span>🃏 Memory Match — fewest moves</span><b id="score-memory">—</b></div>
+              <div class="row"><span>🦁 Word Cards — words explored</span><b id="score-words">—</b></div>
+            </div>
+
+            <a class="exitline" href="/" style="display:block;text-decoration:none">psst… grown-ups: tap here to go back to the terminal ⌨️</a>
+          </section>
+
+          <!-- ============ MATH DASH ============ -->
+          <section class="view" id="view-math">
+            <button class="backbtn" data-goto="home">⬅ Về nhà · Home</button>
+            <h2 class="gametitle">🔢 Math Dash</h2>
+            <p class="gamesub">Tính nhanh nào! · Be quick, be right!</p>
+            <div class="status">
+              <div class="chip">Câu · Question<b id="math-q">1 / 10</b></div>
+              <div class="chip">Điểm · Score<b id="math-score">0</b></div>
+              <div class="chip">Đúng · Streak<b id="math-streak">0 🔥</b></div>
+            </div>
+            <div id="math-play">
+              <div class="question" id="math-question">3 + 4 = ?</div>
+              <div class="answers" id="math-answers"></div>
+              <p class="feedback" id="math-feedback"></p>
+            </div>
+            <div class="endbox" id="math-end" hidden>
+              <div class="stars" id="math-stars">⭐⭐⭐</div>
+              <p class="big" id="math-end-title">Giỏi lắm! Great job!</p>
+              <p class="small" id="math-end-line">You got 10 out of 10!</p>
+              <button class="againbtn" id="math-again">▶ Chơi lại · Play again</button>
+            </div>
+          </section>
+
+          <!-- ============ MEMORY MATCH ============ -->
+          <section class="view" id="view-memory">
+            <button class="backbtn" data-goto="home">⬅ Về nhà · Home</button>
+            <h2 class="gametitle">🃏 Memory Match</h2>
+            <p class="gamesub">Lật thẻ, tìm cặp giống nhau! · Flip &amp; match!</p>
+            <div class="status">
+              <div class="chip">Lượt · Moves<b id="mem-moves">0</b></div>
+              <div class="chip">Cặp · Pairs<b id="mem-pairs">0 / 6</b></div>
+            </div>
+            <div class="memgrid" id="mem-grid"></div>
+            <p class="feedback" id="mem-feedback"></p>
+            <button class="againbtn" id="mem-again" hidden>▶ Chơi lại · Play again</button>
+          </section>
+
+          <!-- ============ WORD CARDS ============ -->
+          <section class="view" id="view-words">
+            <button class="backbtn" data-goto="home">⬅ Về nhà · Home</button>
+            <h2 class="gametitle">🦁 Word Cards</h2>
+            <p class="gamesub">Chạm vào thẻ để lật! · Tap the card to flip!</p>
+            <button class="wordcard en" id="word-card">
+              <span class="cat" id="word-cat">Animals · Động vật</span>
+              <span class="art" id="word-art">🐶</span>
+              <span class="w" id="word-text">Dog</span>
+              <span class="hint" id="word-hint">Tap! 👆 Chạm để xem tiếng Việt</span>
+            </button>
+            <div class="wordnav">
+              <button class="navbtn move" id="word-prev" aria-label="Previous word">⬅</button>
+              <button class="navbtn say" id="word-say">🔊 Nghe · Listen</button>
+              <button class="navbtn move" id="word-next" aria-label="Next word">➡</button>
+            </div>
+            <p class="feedback" id="word-count">1 / 16</p>
+          </section>
+
+        </div>
+      </div>
+    </div>
+    <script>
+      "use strict";
+
+      /* ---------- tiny safe storage ---------- */
+      var store = {
+        get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+        set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+      };
+      var K_MATH = "minh_arcade_math_best";
+      var K_MEM = "minh_arcade_mem_best";
+      var K_WORDS = "minh_arcade_words_seen";
+
+      function shuffle(a) {
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = a[i]; a[i] = a[j]; a[j] = t;
+        }
+        return a;
+      }
+      function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+      /* ---------- navigation ---------- */
+      var started = { math: false, memory: false };
+      function showView(name) {
+        var views = document.querySelectorAll(".view");
+        for (var i = 0; i < views.length; i++) views[i].classList.remove("on");
+        document.getElementById("view-" + name).classList.add("on");
+        document.querySelector(".screen").scrollTop = 0;
+        if (name === "math") startMath();
+        if (name === "memory") startMemory();
+        if (name === "home") updateBoard();
+      }
+      var navBtns = document.querySelectorAll("[data-goto]");
+      for (var n = 0; n < navBtns.length; n++) {
+        navBtns[n].addEventListener("click", function () { showView(this.getAttribute("data-goto")); });
+      }
+
+      function updateBoard() {
+        var m = store.get(K_MATH);
+        var mem = store.get(K_MEM);
+        var seen = [];
+        try { seen = JSON.parse(store.get(K_WORDS) || "[]"); } catch (e) { seen = []; }
+        document.getElementById("score-math").textContent = m === null ? "—" : m + " / 10 ⭐";
+        document.getElementById("score-memory").textContent = mem === null ? "—" : mem + " moves 🏅";
+        document.getElementById("score-words").textContent = seen.length === 0 ? "—" : seen.length + " / 16 📚";
+      }
+
+      /* ================================================================
+         GAME 1 — MATH DASH  (add & subtract within 20, 10 questions)
+         ================================================================ */
+      var math = { q: 0, score: 0, streak: 0, answer: 0, lock: false };
+      var PRAISE = [
+        "Giỏi lắm! Great job! 🎉",
+        "Đúng rồi! That's right! ⭐",
+        "Siêu quá! Super! 🚀",
+        "Tuyệt vời! Awesome! 🌟",
+        "Minh giỏi quá! Brilliant! 🏆"
+      ];
+
+      function startMath() {
+        math.q = 0; math.score = 0; math.streak = 0;
+        document.getElementById("math-end").hidden = true;
+        document.getElementById("math-play").hidden = false;
+        nextQuestion();
+      }
+
+      function nextQuestion() {
+        math.q++;
+        math.lock = false;
+        document.getElementById("math-q").textContent = math.q + " / 10";
+        document.getElementById("math-score").textContent = math.score;
+        document.getElementById("math-streak").textContent = math.streak + " 🔥";
+        document.getElementById("math-feedback").textContent = "";
+        document.getElementById("math-feedback").className = "feedback";
+
+        var a, b, op, ans;
+        if (Math.random() < 0.5) {           /* addition, total ≤ 20 */
+          a = 2 + Math.floor(Math.random() * 14);          /* 2..15 */
+          b = 1 + Math.floor(Math.random() * (20 - a));    /* keeps a+b ≤ 20 */
+          ans = a + b; op = "+";
+        } else {                             /* subtraction, never negative */
+          a = 5 + Math.floor(Math.random() * 16);          /* 5..20 */
+          b = 1 + Math.floor(Math.random() * a);           /* 1..a */
+          ans = a - b; op = "−";
+        }
+        math.answer = ans;
+        var qEl = document.getElementById("math-question");
+        qEl.textContent = a + " " + op + " " + b + " = ?";
+        qEl.classList.remove("pop"); void qEl.offsetWidth; qEl.classList.add("pop");
+
+        var choices = [ans];
+        var offsets = shuffle([-3, -2, -1, 1, 2, 3, 10, -10]).slice();
+        while (choices.length < 4 && offsets.length) {
+          var c = ans + offsets.pop();
+          if (c >= 0 && c <= 30 && choices.indexOf(c) === -1) choices.push(c);
+        }
+        while (choices.length < 4) { var r = Math.floor(Math.random() * 21); if (choices.indexOf(r) === -1) choices.push(r); }
+        shuffle(choices);
+
+        var box = document.getElementById("math-answers");
+        box.innerHTML = "";
+        choices.forEach(function (val) {
+          var btn = document.createElement("button");
+          btn.className = "ansbtn";
+          btn.textContent = val;
+          btn.addEventListener("click", function () { answerMath(btn, val); });
+          box.appendChild(btn);
+        });
+      }
+
+      function answerMath(btn, val) {
+        if (math.lock) return;
+        math.lock = true;
+        var fb = document.getElementById("math-feedback");
+        var btns = document.querySelectorAll("#math-answers .ansbtn");
+        var i;
+        if (val === math.answer) {
+          math.score++; math.streak++;
+          btn.classList.add("right");
+          fb.textContent = pick(PRAISE);
+          fb.className = "feedback good";
+        } else {
+          math.streak = 0;
+          btn.classList.add("wrong");
+          for (i = 0; i < btns.length; i++) {
+            if (parseInt(btns[i].textContent, 10) === math.answer) btns[i].classList.add("right");
+          }
+          fb.textContent = "Gần đúng rồi! Đáp án là " + math.answer + " · The answer is " + math.answer + " 💪";
+          fb.className = "feedback oops";
+        }
+        for (i = 0; i < btns.length; i++) btns[i].disabled = true;
+        document.getElementById("math-score").textContent = math.score;
+        document.getElementById("math-streak").textContent = math.streak + " 🔥";
+
+        setTimeout(function () {
+          if (math.q >= 10) endMath(); else nextQuestion();
+        }, val === math.answer ? 1000 : 1700);
+      }
+
+      function endMath() {
+        document.getElementById("math-play").hidden = true;
+        var end = document.getElementById("math-end");
+        end.hidden = false;
+        var stars = math.score >= 9 ? 3 : math.score >= 6 ? 2 : math.score >= 3 ? 1 : 0;
+        document.getElementById("math-stars").textContent = "⭐".repeat(stars) + "☆".repeat(3 - stars);
+        document.getElementById("math-end-title").textContent =
+          math.score === 10 ? "HOÀN HẢO! PERFECT! 🏆" :
+          math.score >= 6 ? "Giỏi lắm! Great job! 🎉" : "Cố lên! Good try! 💪";
+        document.getElementById("math-end-line").textContent =
+          "Minh được " + math.score + " / 10 · You got " + math.score + " out of 10!";
+        var best = parseInt(store.get(K_MATH) || "-1", 10);
+        if (math.score > best) store.set(K_MATH, String(math.score));
+        speak("Great job Minh! You got " + math.score + " out of 10!", "en-US");
+      }
+      document.getElementById("math-again").addEventListener("click", startMath);
+
+      /* ================================================================
+         GAME 2 — MEMORY MATCH  (6 pairs, 4 × 3)
+         ================================================================ */
+      var MEM_FACES = ["🦁", "🐸", "🍎", "🚗", "⭐", "🌈"];
+      var mem = { first: null, lock: false, moves: 0, pairs: 0 };
+
+      function startMemory() {
+        mem.first = null; mem.lock = false; mem.moves = 0; mem.pairs = 0;
+        document.getElementById("mem-moves").textContent = "0";
+        document.getElementById("mem-pairs").textContent = "0 / 6";
+        document.getElementById("mem-feedback").textContent = "Tìm cặp giống nhau nhé! 👀";
+        document.getElementById("mem-feedback").className = "feedback";
+        document.getElementById("mem-again").hidden = true;
+
+        var deck = shuffle(MEM_FACES.concat(MEM_FACES).slice());
+        var grid = document.getElementById("mem-grid");
+        grid.innerHTML = "";
+        deck.forEach(function (face) {
+          var card = document.createElement("button");
+          card.className = "memcard";
+          card.setAttribute("data-face", face);
+          card.setAttribute("aria-label", "Memory card");
+          card.innerHTML = '<span class="inner"><span class="face front">?</span><span class="face back">' + face + "</span></span>";
+          card.addEventListener("click", function () { flipCard(card); });
+          grid.appendChild(card);
+        });
+      }
+
+      function flipCard(card) {
+        if (mem.lock || card.classList.contains("flipped")) return;
+        card.classList.add("flipped");
+        if (!mem.first) { mem.first = card; return; }
+
+        var a = mem.first, b = card;
+        mem.first = null;
+        mem.moves++;
+        document.getElementById("mem-moves").textContent = mem.moves;
+        var fb = document.getElementById("mem-feedback");
+
+        if (a.getAttribute("data-face") === b.getAttribute("data-face")) {
+          a.classList.add("matched"); b.classList.add("matched");
+          mem.pairs++;
+          document.getElementById("mem-pairs").textContent = mem.pairs + " / 6";
+          fb.textContent = pick(["Đúng cặp rồi! Match! 🎉", "Hay quá! Found a pair! ⭐", "Giỏi! Great memory! 🧠"]);
+          fb.className = "feedback good";
+          if (mem.pairs === 6) {
+            var best = parseInt(store.get(K_MEM) || "9999", 10);
+            if (mem.moves < best) store.set(K_MEM, String(mem.moves));
+            fb.textContent = "THẮNG RỒI! YOU WIN! 🏆 " + mem.moves + " lượt · moves!";
+            document.getElementById("mem-again").hidden = false;
+            speak("You win! Great memory Minh!", "en-US");
+          }
+        } else {
+          mem.lock = true;
+          fb.textContent = "Chưa đúng, thử lại nhé! Try again! 💪";
+          fb.className = "feedback oops";
+          setTimeout(function () {
+            a.classList.remove("flipped"); b.classList.remove("flipped");
+            mem.lock = false;
+            fb.textContent = "";
+            fb.className = "feedback";
+          }, 850);
+        }
+      }
+      document.getElementById("mem-again").addEventListener("click", startMemory);
+
+      /* ================================================================
+         GAME 3 — WORD CARDS  (English ↔ Vietnamese, tap to flip + listen)
+         ================================================================ */
+      var WORDS = [
+        { en: "Dog",   vi: "Con chó",    art: "🐶", cat: "Animals · Động vật" },
+        { en: "Cat",   vi: "Con mèo",    art: "🐱", cat: "Animals · Động vật" },
+        { en: "Fish",  vi: "Con cá",     art: "🐟", cat: "Animals · Động vật" },
+        { en: "Bird",  vi: "Con chim",   art: "🐦", cat: "Animals · Động vật" },
+        { en: "Lion",  vi: "Sư tử",      art: "🦁", cat: "Animals · Động vật" },
+        { en: "Pig",   vi: "Con heo",    art: "🐷", cat: "Animals · Động vật" },
+        { en: "Red",    vi: "Màu đỏ",        art: "🔴", cat: "Colors · Màu sắc" },
+        { en: "Blue",   vi: "Màu xanh dương", art: "🔵", cat: "Colors · Màu sắc" },
+        { en: "Yellow", vi: "Màu vàng",       art: "🟡", cat: "Colors · Màu sắc" },
+        { en: "Green",  vi: "Màu xanh lá",    art: "🟢", cat: "Colors · Màu sắc" },
+        { en: "Purple", vi: "Màu tím",        art: "🟣", cat: "Colors · Màu sắc" },
+        { en: "Apple",  vi: "Quả táo",   art: "🍎", cat: "Food · Đồ ăn" },
+        { en: "Banana", vi: "Quả chuối", art: "🍌", cat: "Food · Đồ ăn" },
+        { en: "Rice",   vi: "Cơm",       art: "🍚", cat: "Food · Đồ ăn" },
+        { en: "Milk",   vi: "Sữa",       art: "🥛", cat: "Food · Đồ ăn" },
+        { en: "Bread",  vi: "Bánh mì",   art: "🍞", cat: "Food · Đồ ăn" }
+      ];
+      var word = { idx: 0, side: "en" };
+
+      function seenSet() {
+        try { return JSON.parse(store.get(K_WORDS) || "[]"); } catch (e) { return []; }
+      }
+      function markSeen(i) {
+        var s = seenSet();
+        if (s.indexOf(i) === -1) { s.push(i); store.set(K_WORDS, JSON.stringify(s)); }
+      }
+
+      function renderWord() {
+        var w = WORDS[word.idx];
+        var card = document.getElementById("word-card");
+        card.className = "wordcard " + word.side;
+        document.getElementById("word-cat").textContent = w.cat;
+        document.getElementById("word-art").textContent = w.art;
+        document.getElementById("word-text").textContent = word.side === "en" ? w.en : w.vi;
+        document.getElementById("word-hint").textContent = word.side === "en"
+          ? "Tap! 👆 Chạm để xem tiếng Việt"
+          : "Tap! 👆 Tap to see English";
+        document.getElementById("word-count").textContent = (word.idx + 1) + " / " + WORDS.length;
+        document.getElementById("word-count").className = "feedback";
+        markSeen(word.idx);
+      }
+
+      function speak(text, lang) {
+        try {
+          if (!("speechSynthesis" in window)) return;
+          window.speechSynthesis.cancel();
+          var u = new SpeechSynthesisUtterance(text);
+          u.lang = lang;
+          u.rate = 0.9;
+          window.speechSynthesis.speak(u);
+        } catch (e) {}
+      }
+
+      document.getElementById("word-card").addEventListener("click", function () {
+        word.side = word.side === "en" ? "vi" : "en";
+        renderWord();
+      });
+      document.getElementById("word-say").addEventListener("click", function () {
+        var w = WORDS[word.idx];
+        if (word.side === "en") speak(w.en, "en-US"); else speak(w.vi, "vi-VN");
+      });
+      document.getElementById("word-next").addEventListener("click", function () {
+        word.idx = (word.idx + 1) % WORDS.length; word.side = "en"; renderWord();
+      });
+      document.getElementById("word-prev").addEventListener("click", function () {
+        word.idx = (word.idx - 1 + WORDS.length) % WORDS.length; word.side = "en"; renderWord();
+      });
+
+      /* ---------- init ---------- */
+      renderWord();
+      updateBoard();
+    </script>
+  </body>
+</html>
