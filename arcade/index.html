@@ -104,7 +104,7 @@
         flex: 1 1 auto;
         overflow-y: auto;
         overscroll-behavior: contain;
-        padding: 16px 16px 22px;
+        padding: 12px 14px 16px;
         scrollbar-width: thin;
         scrollbar-color: var(--win-edge) transparent;
       }
@@ -182,15 +182,15 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        min-height: 52px;
-        padding: 10px 18px;
-        margin: 0 0 14px;
+        min-height: 40px;
+        padding: 6px 14px;
+        margin: 0 0 8px;
         border: 2px solid var(--win-edge);
         border-radius: 999px;
         background: var(--bar);
         color: var(--amber-bright);
         font-family: var(--kid);
-        font-size: 17px;
+        font-size: 15px;
         cursor: pointer;
         touch-action: manipulation;
         user-select: none;
@@ -200,17 +200,43 @@
 
       .gametitle {
         font-family: var(--kid);
-        font-size: 27px;
+        font-size: 21px;
         text-align: center;
-        margin: 0 0 4px;
+        margin: 0 0 2px;
         color: var(--ink);
       }
       .gamesub {
         text-align: center;
         font-family: var(--kid);
-        font-size: 15px;
+        font-size: 13px;
         color: var(--amber-soft);
-        margin: 0 0 16px;
+        margin: 0 0 8px;
+      }
+
+      /* ---- word deck toggle ---- */
+      .deckrow {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin: 0 0 10px;
+      }
+      .deckbtn {
+        font-family: var(--kid);
+        font-size: 14px;
+        padding: 7px 18px;
+        border-radius: 999px;
+        border: 2px solid var(--win-edge);
+        background: var(--bar);
+        color: var(--amber);
+        cursor: pointer;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .deckbtn.on {
+        background: linear-gradient(180deg, var(--amber-bright), var(--amber));
+        color: #221503;
+        border-color: var(--amber-soft);
       }
 
       /* ---- score board ---- */
@@ -253,7 +279,7 @@
         display: flex;
         justify-content: space-between;
         gap: 8px;
-        margin: 0 0 14px;
+        margin: 0 0 10px;
       }
       .chip {
         flex: 1 1 0;
@@ -261,11 +287,11 @@
         background: var(--bar);
         border: 1px solid var(--win-edge);
         border-radius: 12px;
-        padding: 8px 4px;
+        padding: 5px 4px;
         font-size: 12px;
         color: var(--amber-dim);
       }
-      .chip b { display: block; font-size: 20px; color: var(--ink); font-family: var(--kid); }
+      .chip b { display: block; font-size: 17px; color: var(--ink); font-family: var(--kid); }
 
       .feedback {
         min-height: 30px;
@@ -528,6 +554,10 @@
             <button class="backbtn" data-goto="home">⬅ Về nhà · Home</button>
             <h2 class="gametitle">🦁 Word Cards</h2>
             <p class="gamesub">Chạm vào thẻ để lật! · Tap the card to flip!</p>
+            <div class="deckrow">
+              <button class="deckbtn on" id="deck-easy">😊 Dễ · Easy</button>
+              <button class="deckbtn" id="deck-hard">🚀 Khó · Hard</button>
+            </div>
             <button class="wordcard en" id="word-card">
               <span class="cat" id="word-cat">Animals · Động vật</span>
               <span class="art" id="word-art">🐶</span>
@@ -788,18 +818,41 @@
         { en: "Milk",   vi: "Sữa",       art: "🥛", cat: "Food · Đồ ăn" },
         { en: "Bread",  vi: "Bánh mì",   art: "🍞", cat: "Food · Đồ ăn" }
       ];
-      var word = { idx: 0, side: "en" };
+      var WORDS_HARD = [
+        { en: "Elephant",  vi: "Con voi",      art: "🐘", cat: "Animals · Động vật" },
+        { en: "Giraffe",   vi: "Hươu cao cổ",  art: "🦒", cat: "Animals · Động vật" },
+        { en: "Monkey",    vi: "Con khỉ",      art: "🐵", cat: "Animals · Động vật" },
+        { en: "Dinosaur",  vi: "Khủng long",   art: "🦕", cat: "Animals · Động vật" },
+        { en: "Rainbow",   vi: "Cầu vồng",     art: "🌈", cat: "Nature · Thiên nhiên" },
+        { en: "Mountain",  vi: "Ngọn núi",     art: "🏔️", cat: "Nature · Thiên nhiên" },
+        { en: "Ocean",     vi: "Đại dương",    art: "🌊", cat: "Nature · Thiên nhiên" },
+        { en: "Volcano",   vi: "Núi lửa",      art: "🌋", cat: "Nature · Thiên nhiên" },
+        { en: "Bicycle",   vi: "Xe đạp",       art: "🚲", cat: "Things · Đồ vật" },
+        { en: "Airplane",  vi: "Máy bay",      art: "✈️", cat: "Things · Đồ vật" },
+        { en: "Umbrella",  vi: "Cái ô",        art: "☂️", cat: "Things · Đồ vật" },
+        { en: "Library",   vi: "Thư viện",     art: "📚", cat: "School · Trường học" },
+        { en: "Pencil",    vi: "Bút chì",      art: "✏️", cat: "School · Trường học" },
+        { en: "Strawberry", vi: "Quả dâu tây", art: "🍓", cat: "Food · Đồ ăn" },
+        { en: "Chocolate", vi: "Sô cô la",     art: "🍫", cat: "Food · Đồ ăn" },
+        { en: "Breakfast", vi: "Bữa sáng",     art: "🍳", cat: "Food · Đồ ăn" }
+      ];
+      var word = { idx: 0, side: "en", deck: "easy" };
+      function deck() { return word.deck === "hard" ? WORDS_HARD : WORDS; }
+      function seenKey(i) { return (word.deck === "hard" ? "h" : "e") + i; }
 
       function seenSet() {
-        try { return JSON.parse(store.get(K_WORDS) || "[]"); } catch (e) { return []; }
+        try {
+          var raw = JSON.parse(store.get(K_WORDS) || "[]");
+          return raw.map(function (x) { return typeof x === "number" ? "e" + x : x; });
+        } catch (e) { return []; }
       }
       function markSeen(i) {
-        var s = seenSet();
-        if (s.indexOf(i) === -1) { s.push(i); store.set(K_WORDS, JSON.stringify(s)); }
+        var s = seenSet(), k = seenKey(i);
+        if (s.indexOf(k) === -1) { s.push(k); store.set(K_WORDS, JSON.stringify(s)); }
       }
 
       function renderWord() {
-        var w = WORDS[word.idx];
+        var w = deck()[word.idx];
         var card = document.getElementById("word-card");
         card.className = "wordcard " + word.side;
         document.getElementById("word-cat").textContent = w.cat;
@@ -808,7 +861,7 @@
         document.getElementById("word-hint").textContent = word.side === "en"
           ? "Tap! 👆 Chạm để xem tiếng Việt"
           : "Tap! 👆 Tap to see English";
-        document.getElementById("word-count").textContent = (word.idx + 1) + " / " + WORDS.length;
+        document.getElementById("word-count").textContent = (word.idx + 1) + " / " + deck().length;
         document.getElementById("word-count").className = "feedback";
         markSeen(word.idx);
       }
@@ -854,15 +907,24 @@
         word.side = word.side === "en" ? "vi" : "en";
         renderWord();
       });
+      function setDeck(d) {
+        if (word.deck === d) return;
+        word.deck = d; word.idx = 0; word.side = "en";
+        document.getElementById("deck-easy").className = "deckbtn" + (d === "easy" ? " on" : "");
+        document.getElementById("deck-hard").className = "deckbtn" + (d === "hard" ? " on" : "");
+        renderWord();
+      }
+      document.getElementById("deck-easy").addEventListener("click", function () { setDeck("easy"); });
+      document.getElementById("deck-hard").addEventListener("click", function () { setDeck("hard"); });
       document.getElementById("word-say").addEventListener("click", function () {
-        var w = WORDS[word.idx];
+        var w = deck()[word.idx];
         if (word.side === "en") speak(w.en, "en-US"); else speak(w.vi, "vi-VN");
       });
       document.getElementById("word-next").addEventListener("click", function () {
-        word.idx = (word.idx + 1) % WORDS.length; word.side = "en"; renderWord();
+        word.idx = (word.idx + 1) % deck().length; word.side = "en"; renderWord();
       });
       document.getElementById("word-prev").addEventListener("click", function () {
-        word.idx = (word.idx - 1 + WORDS.length) % WORDS.length; word.side = "en"; renderWord();
+        word.idx = (word.idx - 1 + deck().length) % deck().length; word.side = "en"; renderWord();
       });
 
       /* ---------- init ---------- */
