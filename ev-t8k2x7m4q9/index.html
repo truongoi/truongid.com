@@ -66,7 +66,7 @@
       .calc label { display: block; font-size: 16px; color: #6b665c; margin-bottom: 4px; }
       .calc label .opt { font-size: 13px; }
       .calc input {
-        width: 100%; min-width: 0; font: inherit; font-size: 18px; padding: 10px 12px;
+        width: 100%; min-width: 0; height: 50px; font: inherit; font-size: 18px; padding: 10px 12px;
         border: 1px solid #ddd6c4; border-radius: 10px; background: #ffffff; color: #22201c;
       }
       /* iOS Safari's native date control has a fixed intrinsic width that
@@ -74,7 +74,7 @@
          the appearance makes it a plain field at our width, blank when empty
          (same fix as the Dino admin date fields). Tap still opens the wheel. */
       .calc input[type="date"] { -webkit-appearance: none; appearance: none; }
-      .calc input[type="date"]::-webkit-date-and-time-value { margin: 0; text-align: left; }
+      .calc input[type="date"]::-webkit-date-and-time-value { margin: 0; text-align: left; line-height: 28px; }
       .calc input[type="date"]::-webkit-datetime-edit { padding: 0; }
       .calc button {
         width: 100%; margin-top: 14px; font: inherit; font-weight: 700; padding: 12px;
