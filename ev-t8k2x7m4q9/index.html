@@ -62,12 +62,20 @@
       tr.sub td { background: #faf8f2; font-weight: 600; }
       .calc { background: #ffffff; border: 1px solid #e5dfd2; border-radius: 14px; padding: 16px; }
       .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .calc-grid > div { min-width: 0; }
       .calc label { display: block; font-size: 16px; color: #6b665c; margin-bottom: 4px; }
       .calc label .opt { font-size: 13px; }
       .calc input {
-        width: 100%; font: inherit; font-size: 18px; padding: 10px 12px;
+        width: 100%; min-width: 0; font: inherit; font-size: 18px; padding: 10px 12px;
         border: 1px solid #ddd6c4; border-radius: 10px; background: #ffffff; color: #22201c;
       }
+      /* iOS Safari's native date control has a fixed intrinsic width that
+         overflows its grid column and pre-displays today's date; taking over
+         the appearance makes it a plain field at our width, blank when empty
+         (same fix as the Dino admin date fields). Tap still opens the wheel. */
+      .calc input[type="date"] { -webkit-appearance: none; appearance: none; }
+      .calc input[type="date"]::-webkit-date-and-time-value { margin: 0; text-align: left; }
+      .calc input[type="date"]::-webkit-datetime-edit { padding: 0; }
       .calc button {
         width: 100%; margin-top: 14px; font: inherit; font-weight: 700; padding: 12px;
         border: 0; border-radius: 10px; background: #2e5339; color: #ffffff; cursor: pointer;
@@ -123,11 +131,11 @@
           </div>
           <div>
             <label for="c-total">Tổng tiền điện ($)</label>
-            <input id="c-total" type="number" inputmode="decimal" min="0" step="0.01" placeholder="393.76" />
+            <input id="c-total" type="number" inputmode="decimal" min="0" step="0.01" />
           </div>
           <div>
             <label for="c-heads">Số người <span class="opt">(không bắt buộc)</span></label>
-            <input id="c-heads" type="number" inputmode="numeric" min="1" step="1" placeholder="4" />
+            <input id="c-heads" type="number" inputmode="numeric" min="1" step="1" />
           </div>
         </div>
         <button id="c-go" type="button">Tính</button>
