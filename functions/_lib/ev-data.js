@@ -9,7 +9,7 @@
  * Regenerate this module whenever a new session is reported. */
 
 export const EV_DATA = {
-  updatedAt: "2026-10-18",
+  updatedAt: "2026-10-19",
   ratePerKwh: 0.24,
   currency: "USD",
   dashboardUrl: "https://truongid.com/ev-t8k2x7m4q9/",
@@ -26,12 +26,13 @@ export const EV_DATA = {
     { date: "2026-10-11", startPct: null, endPct: null, kwh: 49.90, cost: 11.98 },
     { date: "2026-10-13", startPct: null, endPct: null, kwh: 12.20, cost: 2.93 },
     { date: "2026-10-14", startPct: null, endPct: null, kwh: 46.20, cost: 11.09 },
-    { date: "2026-10-18", startPct: null, endPct: null, kwh: 47.80, cost: 11.47 }
+    { date: "2026-10-18", startPct: null, endPct: null, kwh: 47.80, cost: 11.47 },
+    { date: "2026-10-19", startPct: null, endPct: null, kwh: 27.90, cost: 6.70 }
   ],
   totals: {
     september: { kwh: 165.20, cost: 39.65, sessions: 4 },
-    october: { kwh: 370.40, cost: 88.91, sessions: 9 },
-    allTime: { kwh: 535.60, cost: 128.56, sessions: 13 }
+    october: { kwh: 398.30, cost: 95.61, sessions: 10 },
+    allTime: { kwh: 563.50, cost: 135.26, sessions: 14 }
   },
-  currentWeek: { isoWeek: "2026-W42", kwh: 106.20, cost: 25.49, sessions: 3 }
+  currentWeek: { isoWeek: "2026-W43", kwh: 27.90, cost: 6.70, sessions: 1 }
 };
