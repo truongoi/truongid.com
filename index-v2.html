@@ -1,0 +1,1072 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#14100c" />
+    <link rel="icon" href="data:," />
+    <title>Truong Nguyen — Professional ID</title>
+    <meta name="description" content="The professional card of Truong Nguyen, front-end engineer and builder of practical digital systems." />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #14100c;
+        --win: #1a140e;
+        --win-edge: #3a2c1c;
+        --bar: #241b12;
+        --amber: #f0a840;
+        --amber-bright: #ffd479;
+        --amber-soft: #d99a35;
+        --amber-dim: #9a7434;
+        --warn: #ff8a66;
+        --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body { height: 100%; }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--amber);
+        font-family: var(--mono);
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .stage {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+        background:
+          radial-gradient(120% 90% at 50% 0%, rgba(240, 168, 64, 0.07), transparent 60%),
+          var(--bg);
+      }
+
+      .window {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: min(720px, 100%);
+        height: min(680px, 100%);
+        background: var(--win);
+        border: 1px solid var(--win-edge);
+        border-radius: 14px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 2px 0 rgba(255, 212, 121, 0.05) inset;
+        overflow: hidden;
+      }
+
+      .titlebar {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 14px;
+        background: var(--bar);
+        border-bottom: 1px solid var(--win-edge);
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .dot { width: 12px; height: 12px; border-radius: 50%; flex: 0 0 auto; }
+      .dot.r { background: #e0654f; }
+      .dot.y { background: #e8b34b; }
+      .dot.g { background: #7fb069; }
+
+      .titlebar .tt {
+        flex: 1 1 auto;
+        text-align: center;
+        font-size: 12.5px;
+        color: var(--amber-dim);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: 52px;
+      }
+
+      .pane {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 16px 16px 10px;
+        font-size: 14px;
+        line-height: 1.6;
+        scrollbar-width: thin;
+        scrollbar-color: var(--win-edge) transparent;
+        cursor: text;
+      }
+
+      .pane::-webkit-scrollbar { width: 8px; }
+      .pane::-webkit-scrollbar-thumb { background: var(--win-edge); border-radius: 4px; }
+
+      .pane p { margin: 0 0 2px; white-space: pre-wrap; word-break: break-word; }
+      .pane .bright { color: var(--amber-bright); font-weight: 600; }
+      .pane .dim { color: var(--amber-dim); }
+      .pane .warn { color: var(--warn); }
+      .pane a { color: var(--amber-bright); text-decoration: underline; text-underline-offset: 3px; }
+      .pane a:hover { color: #ffe1a1; }
+
+      .pane .ascii {
+        font-size: 11px;
+        line-height: 1.15;
+        font-weight: 700;
+        color: var(--amber-bright);
+        letter-spacing: 0;
+      }
+
+      .prompt-line {
+        position: relative;
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        margin-top: 4px;
+      }
+
+      .prompt-label { color: var(--amber-bright); font-weight: 600; white-space: nowrap; }
+
+      .cmd-input {
+        width: 100%;
+        min-width: 0;
+        background: transparent;
+        border: 0;
+        outline: 0;
+        padding: 0;
+        margin: 0;
+        font: inherit;
+        line-height: inherit;
+        color: var(--amber-bright);
+        caret-color: transparent; /* the block cursor below is the only blinker */
+        position: relative;
+      }
+
+      .input-wrap { position: relative; flex: 1 1 auto; min-width: 0; }
+
+      .ghost {
+        position: absolute;
+        left: 0;
+        top: 0;
+        font: inherit;
+        line-height: inherit;
+        white-space: pre;
+        pointer-events: none;
+        color: transparent;
+      }
+
+      .ghost .rest { color: var(--amber-dim); opacity: 0.8; }
+
+      .cursor-block {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 9px;
+        height: 17px;
+        background: var(--amber);
+        animation: blink 1.06s step-end infinite;
+        display: none;
+        pointer-events: none;
+      }
+
+      .poweroff {
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        background: #000;
+        color: var(--amber);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-align: center;
+        padding: 24px;
+      }
+
+      .poweroff.on { display: flex; }
+      .poweroff p { margin: 0; }
+      .poweroff .big { color: var(--amber-bright); font-size: 17px; }
+      .poweroff .small { color: var(--amber-dim); font-size: 12.5px; }
+
+      .cursor-block.on { display: block; }
+
+      @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+      @media (max-width: 640px) {
+        .pane { font-size: 13px; padding: 13px 13px 8px; }
+        .pane .ascii { font-size: 6px; }
+        .titlebar .tt { margin-right: 0; text-align: left; padding-left: 6px; }
+        .window { height: 100%; border-radius: 10px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .cursor-block { animation: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="stage" id="stage">
+      <section class="window" aria-label="Interactive terminal — Truong Nguyen professional ID">
+        <div class="titlebar" aria-hidden="true">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="tt">truong@id: ~ — zsh</span>
+        </div>
+        <div class="pane" id="pane" aria-live="polite"></div>
+        <div class="poweroff" id="poweroff" role="alert">
+          <p class="big">It is now safe to turn off your computer.</p>
+          <p class="small">(press any key or tap to boot truongOS)</p>
+        </div>
+      </section>
+    </main>
+    <script>
+      (function () {
+        "use strict";
+
+        var DEFAULTS = {
+          pageTitle: "Truong Nguyen — Professional ID",
+          portraitCode: "TRUONG / ID-01",
+          serial: "TN — 2026",
+          eyebrow: "Professional identity",
+          firstName: "Truong",
+          lastName: "Nguyen.",
+          role: "Front-end engineer",
+          statement: "I build clear, dependable web experiences and practical systems that make complicated work feel simple.",
+          specialties: ["Interfaces", "Systems", "Operations"],
+          links: []
+        };
+        var cfg = DEFAULTS;
+
+        var pane = document.getElementById("pane");
+        var stage = document.getElementById("stage");
+        var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var history = [];
+        var histIdx = -1;
+        var currentInput = null;
+        var booted = false;
+        var bootSkipped = false;
+
+        /* ---------- rendering helpers (textContent only — no innerHTML with data) ---------- */
+        function scrollEnd() { pane.scrollTop = pane.scrollHeight; }
+
+        /* While a command runs, its output is collected here and then played
+           back line by line with a jittery delay — a sluggish old machine. */
+        var outQueue = null;
+        function emit(node) {
+          if (outQueue) { outQueue.push(node); return; }
+          pane.appendChild(node);
+          scrollEnd();
+        }
+
+        function line(text, cls) {
+          var p = document.createElement("p");
+          if (cls) p.className = cls;
+          p.textContent = text || "";
+          emit(p);
+          return p;
+        }
+
+        function richLine(segments, cls) {
+          var p = document.createElement("p");
+          if (cls) p.className = cls;
+          segments.forEach(function (s) {
+            if (s.href) {
+              var a = document.createElement("a");
+              a.href = s.href;
+              a.target = "_blank";
+              a.rel = "noopener noreferrer";
+              a.textContent = s.t;
+              p.appendChild(a);
+            } else {
+              var span = document.createElement("span");
+              if (s.c) span.className = s.c;
+              span.textContent = s.t;
+              p.appendChild(span);
+            }
+          });
+          emit(p);
+          return p;
+        }
+
+        function blank() { line(""); }
+
+        /* ---------- prompt ---------- */
+        function makePrompt() {
+          var row = document.createElement("div");
+          row.className = "prompt-line";
+          var label = document.createElement("span");
+          label.className = "prompt-label";
+          label.textContent = "visitor@truongid:~$";
+          var input = document.createElement("input");
+          input.className = "cmd-input";
+          input.type = "text";
+          input.setAttribute("aria-label", "Terminal command input");
+          input.setAttribute("autocomplete", "off");
+          input.setAttribute("autocapitalize", "none");
+          input.setAttribute("spellcheck", "false");
+          input.setAttribute("enterkeyhint", "go");
+          var wrap = document.createElement("div");
+          wrap.className = "input-wrap";
+          var ghost = document.createElement("div");
+          ghost.className = "ghost";
+          ghost.setAttribute("aria-hidden", "true");
+          wrap.appendChild(ghost);
+          wrap.appendChild(input);
+          var cursor = document.createElement("span");
+          cursor.className = "cursor-block";
+          row.appendChild(label);
+          row.appendChild(wrap);
+          row.appendChild(cursor);
+          pane.appendChild(row);
+          currentInput = input;
+
+          /* Ghost suggestion: complete the typed prefix to a known command,
+             shown dim after the text. Tab or → accepts it. */
+          function suggestion() {
+            var v = input.value;
+            if (!v || input.selectionStart !== v.length) return "";
+            var lv = v.toLowerCase();
+            for (var i = 0; i < HINTS.length; i++) {
+              var h = HINTS[i];
+              if (h.length > lv.length && h.indexOf(lv) === 0) return h;
+            }
+            return "";
+          }
+          function paintGhost() {
+            var s = suggestion();
+            ghost.textContent = "";
+            if (!s) return;
+            var pre = document.createElement("span");
+            pre.textContent = input.value;
+            var rest = document.createElement("span");
+            rest.className = "rest";
+            rest.textContent = s.slice(input.value.length);
+            ghost.appendChild(pre);
+            ghost.appendChild(rest);
+          }
+          /* One single blinker: the block, parked exactly at the caret
+             (monospace → measure the text before the caret). */
+          var measureCtx = document.createElement("canvas").getContext("2d");
+          function placeCursor() {
+            if (document.activeElement !== input || input.selectionStart !== input.selectionEnd) {
+              cursor.classList.remove("on");
+              return;
+            }
+            measureCtx.font = window.getComputedStyle(input).font;
+            var w = measureCtx.measureText(input.value.substring(0, input.selectionStart)).width;
+            cursor.style.left = (label.offsetWidth + 8 + w) + "px";
+            cursor.classList.add("on");
+          }
+          function refresh() { paintGhost(); placeCursor(); }
+          input.addEventListener("input", refresh);
+          input.addEventListener("keyup", placeCursor);
+          input.addEventListener("click", placeCursor);
+          input.addEventListener("focus", refresh);
+          input.addEventListener("blur", function () { cursor.classList.remove("on"); ghost.textContent = ""; });
+          input.addEventListener("keydown", function (ev) {
+            if (ev.key === "Tab" || (ev.key === "ArrowRight" && input.selectionStart === input.value.length)) {
+              var sug = suggestion();
+              if (sug) {
+                ev.preventDefault();
+                input.value = sug;
+                refresh();
+              } else if (ev.key === "Tab") {
+                ev.preventDefault();
+              }
+              return;
+            }
+            if (ev.key === "Enter") {
+              ev.preventDefault();
+              var value = input.value;
+              /* freeze this prompt line into static scrollback */
+              var echo = document.createElement("span");
+              echo.textContent = value;
+              echo.style.color = "var(--amber-bright)";
+              wrap.replaceChild(echo, input);
+              ghost.remove();
+              cursor.remove();
+              currentInput = null;
+              if (value.trim()) { history.push(value); }
+              histIdx = history.length;
+              run(value);
+            } else if (ev.key === "ArrowUp") {
+              ev.preventDefault();
+              if (histIdx > 0) { histIdx--; input.value = history[histIdx] || ""; refresh(); }
+            } else if (ev.key === "ArrowDown") {
+              ev.preventDefault();
+              if (histIdx < history.length) { histIdx++; input.value = history[histIdx] || ""; refresh(); }
+            }
+          });
+          scrollEnd();
+          placeCursor();
+          return input;
+        }
+
+        function focusInput() { if (currentInput) currentInput.focus({ preventScroll: true }); }
+
+        /* ---------- content builders ---------- */
+        function fullName() { return (cfg.firstName + " " + (cfg.lastName || "")).trim(); }
+        function specFlags() {
+          return (cfg.specialties || []).map(function (s) { return "--" + String(s).toLowerCase().replace(/\s+/g, "-"); });
+        }
+        var GLOSSES = {
+          "interfaces": "clean, usable interfaces for web products",
+          "systems": "practical systems that make complicated work feel simple",
+          "operations": "dependable day-to-day running of things"
+        };
+        function gloss(s) { return GLOSSES[String(s).toLowerCase()] || ""; }
+
+        function printMan() {
+          var flags = specFlags();
+          richLine([{ t: "TRUONG(1)", c: "bright" }, { t: "          User Commands          " }, { t: "TRUONG(1)", c: "bright" }]);
+          blank();
+          line("NAME", "bright");
+          line("    " + fullName().toLowerCase().replace(/\.$/, "") + " — " + String(cfg.role).toLowerCase());
+          blank();
+          line("SYNOPSIS", "bright");
+          richLine([{ t: "    truong " }, { t: flags.map(function (f) { return "[" + f + "]"; }).join(" "), c: "bright" }]);
+          blank();
+          line("DESCRIPTION", "bright");
+          line("    " + cfg.statement);
+          blank();
+          line("SPECIALTIES", "bright");
+          (cfg.specialties || []).forEach(function (s, i) {
+            var g = gloss(s);
+            richLine([{ t: "    " + flags[i], c: "bright" }, { t: g ? "  " + g : "" }]);
+          });
+          blank();
+          richLine([{ t: "TRUONG(1)", c: "dim" }, { t: "          " + cfg.portraitCode + " · " + cfg.serial + "          " }, { t: "TRUONG(1)", c: "dim" }]);
+        }
+
+        function printAbout() {
+          richLine([{ t: fullName(), c: "bright" }, { t: " — " + cfg.role }]);
+          line(cfg.statement);
+          line(cfg.eyebrow + " · " + cfg.portraitCode + " · " + cfg.serial, "dim");
+        }
+
+        function printSkills() {
+          (cfg.specialties || []).forEach(function (s, i) {
+            var g = gloss(s);
+            richLine([{ t: specFlags()[i] + "  ", c: "bright" }, { t: s + (g ? " — " + g : "") }]);
+          });
+        }
+
+        function printNeofetch() {
+          richLine([{ t: "truong@truongid", c: "bright" }]);
+          line("----------------");
+          richLine([{ t: "OS: ", c: "bright" }, { t: "truongOS 1.0" }]);
+          richLine([{ t: "Host: ", c: "bright" }, { t: "truongid.com" }]);
+          richLine([{ t: "Shell: ", c: "bright" }, { t: "zsh" }]);
+          richLine([{ t: "Role: ", c: "bright" }, { t: cfg.role }]);
+          richLine([{ t: "Location: ", c: "bright" }, { t: "Santa Ana, CA" }]);
+          richLine([{ t: "Online since: ", c: "bright" }, { t: "2016" }]);
+          richLine([{ t: "Serial: ", c: "bright" }, { t: cfg.serial }]);
+        }
+
+        function printSites() {
+          line("Places I keep up:", "bright");
+          richLine([{ t: "  " }, { t: "truongnpt.com", href: "https://truongnpt.com" }, { t: " — blog, writing & projects" }]);
+          richLine([{ t: "  " }, { t: "guihangmy.com", href: "https://guihangmy.com" }, { t: " — Dino Gửi Hàng Mỹ, proxy shipping US → VN" }]);
+          (cfg.links || []).forEach(function (l) {
+            if (l && l.href && l.label) richLine([{ t: "  " }, { t: l.label, href: l.href }]);
+          });
+        }
+
+        function printHelp() {
+          line("Available commands:", "bright");
+          var rows = [
+            ["man truong", "the full manual page"],
+            ["about", "who I am, short version"],
+            ["skills", "what I work on"],
+            ["neofetch", "system specs, but make it personal"],
+            ["sites", "my places on the web"],
+            ["arcade", "Minh's games room"],
+            ["contact", "how to reach me"],
+            ["joke", "a developer joke"],
+            ["date", "current date & time"],
+            ["clear", "wipe the screen"],
+            ["help", "this list"]
+          ];
+          rows.forEach(function (r) { line("  " + r[0] + " — " + r[1]); });
+          if (isAdmin()) {
+            blank();
+            line("Admin commands:", "bright");
+            line("  ev — home EV charging history + dashboard link");
+            line("  logout — end the admin session");
+          }
+          line("Start typing and the terminal suggests. Some commands stay undocumented.", "dim");
+        }
+
+        var JOKES = [
+          "Why do programmers prefer dark mode? Because light attracts bugs.",
+          "There are only 10 types of people: those who understand binary and those who don't.",
+          "Why did the developer go broke? He used up all his cache.",
+          "A SQL query walks into a bar, sees two tables, and asks… “Mind if I join you?”",
+          "!false — it's funny because it's true."
+        ];
+        var jokeIdx = 0;
+
+        /* Completion pool for the ghost hint — documented and secret alike.
+           Order matters: the first prefix match wins. */
+        var HINTS = [
+          "help", "man truong", "about", "whoami", "skills", "neofetch",
+          "sites", "arcade", "contact", "joke", "date", "clear", "exit", "history", "login",
+          "sudo", "hack", "coffee", "vim",
+          "rm -rf /", "reboot", "shutdown", "poweroff", "yes",
+          "kill -9 1", "killall", "mkfs.ext4 /dev/sda",
+          "dd if=/dev/zero of=/dev/sda", "chmod -R 000 /",
+          "history -c", "format c:", ":(){ :|:& };:"
+        ];
+
+        /* ---------- admin session (login / ev / logout) ----------
+           The password is verified server-side by /api/login against an
+           env secret; the page only ever holds the returned signed token
+           (sessionStorage, 12h). The dashboard slug is likewise only ever
+           handed out by /api/ev after the token checks out. */
+        var ADMIN_TOKEN_KEY = "truongos.adminToken";
+
+        function adminToken() {
+          try { return window.sessionStorage.getItem(ADMIN_TOKEN_KEY); } catch (e) { return null; }
+        }
+        function clearAdmin() {
+          try { window.sessionStorage.removeItem(ADMIN_TOKEN_KEY); } catch (e) {}
+        }
+        function isAdmin() {
+          var t = adminToken();
+          if (!t) return false;
+          try {
+            var seg = t.split(".")[0].replace(/-/g, "+").replace(/_/g, "/");
+            var payload = JSON.parse(window.atob(seg));
+            if (!payload.exp || payload.exp * 1000 <= Date.now()) { clearAdmin(); return false; }
+            return true;
+          } catch (e) { return false; }
+        }
+        /* Print through the normal slow-playback queue, then a fresh prompt. */
+        function collectOut(fn) { outQueue = []; fn(); finish(); }
+
+        function makePasswordPrompt(onSubmit) {
+          var row = document.createElement("div");
+          row.className = "prompt-line";
+          var label = document.createElement("span");
+          label.className = "prompt-label";
+          label.textContent = "password:";
+          var input = document.createElement("input");
+          input.className = "cmd-input";
+          input.type = "password";
+          input.setAttribute("aria-label", "Admin password");
+          input.setAttribute("autocomplete", "off");
+          input.setAttribute("autocapitalize", "none");
+          input.setAttribute("spellcheck", "false");
+          input.setAttribute("enterkeyhint", "go");
+          var wrap = document.createElement("div");
+          wrap.className = "input-wrap";
+          wrap.appendChild(input);
+          var cursor = document.createElement("span");
+          cursor.className = "cursor-block";
+          row.appendChild(label);
+          row.appendChild(wrap);
+          row.appendChild(cursor);
+          pane.appendChild(row);
+          currentInput = input;
+
+          var measureCtx = document.createElement("canvas").getContext("2d");
+          function placeCursor() {
+            if (document.activeElement !== input || input.selectionStart !== input.selectionEnd) {
+              cursor.classList.remove("on");
+              return;
+            }
+            measureCtx.font = window.getComputedStyle(input).font;
+            var w = measureCtx.measureText("\u2022".repeat(input.selectionStart)).width;
+            cursor.style.left = (label.offsetWidth + 8 + w) + "px";
+            cursor.classList.add("on");
+          }
+          input.addEventListener("input", placeCursor);
+          input.addEventListener("keyup", placeCursor);
+          input.addEventListener("click", placeCursor);
+          input.addEventListener("focus", placeCursor);
+          input.addEventListener("blur", function () { cursor.classList.remove("on"); });
+          input.addEventListener("keydown", function (ev) {
+            if (ev.key === "Enter") {
+              ev.preventDefault();
+              var value = input.value;
+              var echo = document.createElement("span");
+              echo.textContent = "\u2022".repeat(value.length);
+              echo.style.color = "var(--amber-bright)";
+              wrap.replaceChild(echo, input);
+              cursor.remove();
+              currentInput = null;
+              onSubmit(value);
+            } else if (ev.key === "c" && (ev.ctrlKey || ev.metaKey)) {
+              ev.preventDefault();
+              var echo2 = document.createElement("span");
+              echo2.textContent = "^C";
+              echo2.style.color = "var(--amber-bright)";
+              wrap.replaceChild(echo2, input);
+              cursor.remove();
+              currentInput = null;
+              collectOut(function () { line("login cancelled.", "dim"); });
+            }
+          });
+          scrollEnd();
+          placeCursor();
+          input.focus({ preventScroll: true });
+          return input;
+        }
+
+        function startLogin() {
+          makePasswordPrompt(function (pw) {
+            if (!pw) { collectOut(function () { line("login cancelled.", "dim"); }); return; }
+            line("verifying\u2026", "dim");
+            fetch("/api/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password: pw })
+            }).then(function (res) {
+              return res.json().catch(function () { return {}; }).then(function (data) { return { res: res, data: data }; });
+            }).then(function (r) {
+              if (r.res.ok && r.data.token) {
+                try { window.sessionStorage.setItem(ADMIN_TOKEN_KEY, r.data.token); } catch (e) {}
+                collectOut(function () {
+                  line("Welcome back, admin.", "bright");
+                  line("Admin commands unlocked \u2014 `ev` and `logout`. `help` shows them now.", "dim");
+                });
+              } else if (r.res.status === 503) {
+                collectOut(function () { line("admin not configured yet \u2014 ADMIN_PASSWORD is not set on the server.", "warn"); });
+              } else if (r.res.status === 401) {
+                collectOut(function () { line("login: incorrect password.", "warn"); });
+              } else {
+                collectOut(function () { line("login failed (HTTP " + r.res.status + ").", "warn"); });
+              }
+            }).catch(function () {
+              collectOut(function () { line("login failed \u2014 could not reach the server.", "warn"); });
+            });
+          });
+        }
+
+        function fmtMoney(n) { return "$" + Number(n).toFixed(2); }
+        function fmtKwh(n) { return Number(n).toFixed(2) + " kWh"; }
+        function sessWord(n) { return n === 1 ? "session" : "sessions"; }
+        /* ISO 8601 week number — weeks run Monday to Sunday. */
+        function isoWeek(dateStr) {
+          var p = dateStr.split("-");
+          var d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));
+          var day = (d.getUTCDay() + 6) % 7; /* Mon=0 … Sun=6 */
+          d.setUTCDate(d.getUTCDate() - day + 3); /* Thursday of this week */
+          var firstThu = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+          var fday = (firstThu.getUTCDay() + 6) % 7;
+          firstThu.setUTCDate(firstThu.getUTCDate() - fday + 3);
+          return 1 + Math.round((d - firstThu) / (7 * 24 * 3600 * 1000));
+        }
+
+        function printEv(d) {
+          richLine([{ t: "Home EV charging", c: "bright" }, { t: " \u2014 updated " + d.updatedAt + " \u00b7 rate $" + Number(d.ratePerKwh).toFixed(2) + "/kWh", c: "dim" }]);
+          blank();
+          line("Recent weeks:", "bright");
+          var sessions = d.sessions || [];
+          /* Group sessions by ISO week (keyed by the week's Thursday),
+             newest week first, newest session first inside each week.
+             Show the current week plus the two weeks before it. */
+          function weekKey(dateStr) {
+            var p = dateStr.split("-");
+            var d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));
+            var day = (d.getUTCDay() + 6) % 7;
+            d.setUTCDate(d.getUTCDate() - day + 3);
+            return d.toISOString().slice(0, 10);
+          }
+          var groups = [], byKey = {};
+          sessions.slice().reverse().forEach(function (s) {
+            var k = weekKey(s.date);
+            if (!byKey[k]) { byKey[k] = { wk: isoWeek(s.date), items: [] }; groups.push(byKey[k]); }
+            byKey[k].items.push(s);
+          });
+          groups.slice(0, 3).forEach(function (g, gi) {
+            if (gi > 0) blank();
+            var n = g.items.length;
+            var totKwh = 0, totCost = 0;
+            g.items.forEach(function (s) { totKwh += Number(s.kwh); totCost += Number(s.cost); });
+            /* The total hangs on the brace's tip: the middle row for odd
+               counts, the closing row for even counts. */
+            var totalRow = n === 1 ? 0 : (n % 2 === 1 ? Math.floor(n / 2) : n - 1);
+            g.items.forEach(function (s, i) {
+              var pct = (s.startPct === null || s.startPct === undefined) ? "\u2014" : (s.startPct + "%\u2192" + s.endPct + "%");
+              while (pct.length < 7) pct += " ";
+              var kwh = Number(s.kwh).toFixed(2);
+              while (kwh.length < 5) kwh = " " + kwh;
+              var amt = fmtMoney(s.cost);
+              while (amt.length < 6) amt = " " + amt;
+              var glyph, tail = "";
+              if (n === 1) glyph = "}";
+              else if (i === 0) glyph = "\u23AB";
+              else if (i === n - 1) glyph = "\u23AD";
+              else if (i === totalRow) glyph = "\u23AC";
+              else glyph = "\u23AA";
+              if (i === totalRow) {
+                var tk = (Math.round(totKwh * 100) / 100).toFixed(2);
+                while (tk.length < 5) tk = " " + tk;
+                var ta = fmtMoney(Math.round(totCost * 100) / 100);
+                while (ta.length < 6) ta = " " + ta;
+                tail = "  " + tk + " kWh  " + ta;
+              }
+              line("  W" + g.wk + "  " + s.date + "  " + pct + "  " + kwh + " kWh  " + amt + "  " + glyph + tail);
+            });
+          });
+          blank();
+          var cw = d.currentWeek || {};
+          var oct = (d.totals || {}).october || {};
+          var all = (d.totals || {}).allTime || {};
+          var cwLabel = cw.isoWeek ? "This week (W" + String(cw.isoWeek).split("-W")[1] + ")" : "This week";
+          line(cwLabel + ": " + fmtKwh(cw.kwh) + " \u00b7 " + fmtMoney(cw.cost) + " (" + cw.sessions + " " + sessWord(cw.sessions) + ")");
+          line("October 2026: " + fmtKwh(oct.kwh) + " \u00b7 " + fmtMoney(oct.cost) + " (" + oct.sessions + " " + sessWord(oct.sessions) + ")");
+          line("All time: " + fmtKwh(all.kwh) + " \u00b7 " + fmtMoney(all.cost) + " (" + all.sessions + " " + sessWord(all.sessions) + ")");
+          blank();
+          richLine([{ t: "Mom's dashboard: " }, { t: d.dashboardUrl, href: d.dashboardUrl }]);
+          blank();
+        }
+
+        function runEv() {
+          fetch("/api/ev", { headers: { "Authorization": "Bearer " + adminToken() } })
+            .then(function (res) {
+              return res.json().catch(function () { return {}; }).then(function (data) { return { res: res, data: data }; });
+            })
+            .then(function (r) {
+              if (r.res.status === 401) {
+                clearAdmin();
+                collectOut(function () { line("session expired \u2014 login again.", "warn"); });
+              } else if (!r.res.ok) {
+                collectOut(function () { line("couldn't load EV data (HTTP " + r.res.status + ").", "warn"); });
+              } else {
+                collectOut(function () { printEv(r.data); });
+              }
+            })
+            .catch(function () {
+              collectOut(function () { line("couldn't load EV data \u2014 connection problem.", "warn"); });
+            });
+        }
+
+        /* ---------- command runner ---------- */
+        function done() { makePrompt(); focusInput(); }
+
+        /* Play the collected output back like a slow machine: a processing
+           pause first, then lines trickle out at uneven intervals. */
+        function playQueue(nodes, after) {
+          if (!nodes.length || reduceMotion) {
+            nodes.forEach(function (n) { pane.appendChild(n); });
+            scrollEnd();
+            after();
+            return;
+          }
+          var i = 0;
+          var step = function () {
+            if (i >= nodes.length) { after(); return; }
+            pane.appendChild(nodes[i]);
+            i++;
+            scrollEnd();
+            setTimeout(step, 65 + Math.random() * 70);
+          };
+          setTimeout(step, 280 + Math.random() * 280);
+        }
+
+        function finish() {
+          var nodes = outQueue || [];
+          outQueue = null;
+          playQueue(nodes, done);
+        }
+
+        function hack() {
+          var p = line("Hacking the mainframe…");
+          var pct = 0;
+          var timer = setInterval(function () {
+            pct += 10;
+            var filled = Math.round(pct / 10);
+            p.textContent = "Hacking the mainframe… [" + "▓".repeat(filled) + "░".repeat(10 - filled) + "] " + pct + "%";
+            scrollEnd();
+            if (pct >= 100) {
+              clearInterval(timer);
+              richLine([{ t: "Access granted. ", c: "bright" }, { t: "(Not really.)" }]);
+              done();
+            }
+          }, 140);
+        }
+
+        /* ---------- the dangerous toys ---------- */
+        function rebootSeq(recovered) {
+          pane.textContent = "";
+          var steps = bootLines();
+          var i = 0;
+          (function next() {
+            if (i < steps.length) { steps[i](); i++; setTimeout(next, 130); }
+            else {
+              if (recovered) line("System recovered. Nothing was deleted. Obviously.", "bright");
+              makePrompt();
+              focusInput();
+            }
+          })();
+        }
+
+        var powerOffArmed = false;
+        function powerOff() {
+          if (powerOffArmed) return;
+          powerOffArmed = true;
+          var ov = document.getElementById("poweroff");
+          ov.classList.add("on");
+          /* arm the wake listeners after a beat, so the Enter that ran the
+             command doesn't instantly wake it back up */
+          setTimeout(function () {
+            function wake() {
+              powerOffArmed = false;
+              ov.classList.remove("on");
+              window.removeEventListener("keydown", wake, true);
+              ov.removeEventListener("pointerdown", wake);
+              rebootSeq(false);
+            }
+            window.addEventListener("keydown", wake, true);
+            ov.addEventListener("pointerdown", wake);
+          }, 450);
+        }
+
+        function rmDestroy() {
+          var paths = ["/dev/identity", "/skills/interfaces", "/skills/systems", "/skills/operations", "/motd", "/bin/jokes", "/home/truong", "/etc/truongos"];
+          paths.forEach(function (p) { line("removing " + p + " …"); });
+          var nodes = outQueue || [];
+          outQueue = null;
+          playQueue(nodes, function () {
+            line("Kernel panic — not syncing: attempted to kill init!", "warn");
+            line("truongOS has halted.", "warn");
+            setTimeout(function () {
+              pane.textContent = "";
+              setTimeout(function () { rebootSeq(true); }, 900);
+            }, 1100);
+          });
+        }
+
+        function run(raw) {
+          var input = raw.trim();
+          var lower = input.toLowerCase();
+          if (!input) { done(); return; }
+          outQueue = []; /* collect this command's output for slow playback */
+
+          /* rm -rf outranks the sudo gag — even under sudo */
+          var sudoed = lower === "sudo" || lower.indexOf("sudo ") === 0;
+          var cmd = sudoed ? lower.slice(4).trim() : lower;
+          var isRmRf = cmd.indexOf("rm") === 0 && (cmd.indexOf("-rf") !== -1 || cmd.indexOf("-fr") !== -1) && cmd.indexOf(" /") !== -1;
+          if (isRmRf) {
+            if (sudoed) line("Bold of you.", "warn");
+            if (cmd.indexOf("--no-preserve-root") !== -1) { rmDestroy(); return; }
+            line("rm: it is dangerous to operate recursively on '/'", "warn");
+            line("rm: use --no-preserve-root to override this failsafe", "warn");
+            finish(); return;
+          }
+          if (sudoed) {
+            line("visitor is not in the sudoers file. This incident will be reported to Truong.", "warn");
+            finish(); return;
+          }
+          if (lower === "man") { line("What manual page do you want? Try `man truong`."); finish(); return; }
+          if (lower === "man truong") { printMan(); finish(); return; }
+          if (lower.indexOf("man ") === 0) { line("No manual entry for " + input.slice(4)); finish(); return; }
+
+          /* the fork bomb, by its true name */
+          if (lower.replace(/\s+/g, " ") === ":(){ :|:& };:") {
+            [1, 2, 4, 8].forEach(function (n) {
+              for (var k = 0; k < n; k++) line("visitor@truongid:~$", "dim");
+            });
+            line("…and so on. Fork bomb defused. The machine is old, not stupid.", "bright");
+            finish(); return;
+          }
+          if (lower === "shutdown" || lower === "poweroff" || lower === "halt") { outQueue = null; powerOff(); return; }
+          if (lower === "reboot") { outQueue = null; rebootSeq(false); return; }
+          if (lower === "yes") {
+            for (var y = 0; y < 12; y++) line("y");
+            line("…okay, we get it.", "bright");
+            finish(); return;
+          }
+          if (lower === "killall") { line("No processes were harmed in the running of this command."); finish(); return; }
+          if (lower.indexOf("kill") === 0) {
+            if (/(^|\s)1$/.test(lower)) line("kill: (1): Operation not permitted — you can't kill an idea.", "warn");
+            else line("kill: no such process — nothing here is alive except the jokes.");
+            finish(); return;
+          }
+          if (lower.indexOf("mkfs") === 0) { line("Formatting /dev/sda… ERROR: disk is write-protected by sheer stubbornness.", "warn"); finish(); return; }
+          if (lower === "dd" || lower.indexOf("dd ") === 0) { line("0 bytes written. The disk refused on principle."); finish(); return; }
+          if (lower.indexOf("chmod") === 0) { line("Operation not permitted. Also, rude.", "warn"); finish(); return; }
+          if (lower.indexOf("mv ") === 0) {
+            if (lower.indexOf("/dev/null") !== -1) line("/dev/null is full. Mostly other people's bad ideas.");
+            else line("Nothing here needs moving.");
+            finish(); return;
+          }
+          if (lower.indexOf("format") === 0) { line("This is not that kind of computer."); finish(); return; }
+          if (lower.indexOf("curl") === 0 || lower.indexOf("wget") === 0) {
+            if (lower.indexOf("|") !== -1) line("Never pipe the internet straight into a shell. Not even here.", "warn");
+            else line("Could not resolve host — this terminal lives offline, happily.");
+            finish(); return;
+          }
+          if (lower === "history -c") {
+            history.length = 0;
+            histIdx = 0;
+            line("History cleared. The sudo incident, however, is forever.");
+            finish(); return;
+          }
+          if (lower === "history") {
+            if (!history.length) line("No history yet.");
+            else history.forEach(function (h, i) { line("  " + (i + 1) + "  " + h); });
+            finish(); return;
+          }
+
+          /* admin commands — `ev` stays invisible until login, and `logout`
+             only means something with a live session (else the gag below) */
+          if (lower === "login") {
+            if (isAdmin()) { line("Already logged in. `ev` is ready; `logout` ends the session."); finish(); }
+            else { outQueue = null; startLogin(); }
+            return;
+          }
+          if (isAdmin() && lower === "logout") {
+            clearAdmin();
+            line("Logged out \u2014 admin commands locked.");
+            finish(); return;
+          }
+          if (isAdmin() && lower === "ev") { outQueue = null; runEv(); return; }
+
+          switch (lower) {
+            case "help": printHelp(); break;
+            case "about": case "whoami": printAbout(); break;
+            case "skills": printSkills(); break;
+            case "neofetch": printNeofetch(); break;
+            case "sites": printSites(); break;
+            case "arcade":
+              line("Opening the arcade…", "bright");
+              line("Mind the high scores. Minh holds all of them.", "dim");
+              finish();
+              setTimeout(function () { location.href = "/arcade/"; }, 1600);
+              return;
+            case "contact":
+              line("No public inbox.");
+              richLine([{ t: "Try ", c: "dim" }, { t: "sites", c: "bright" }, { t: " for the places I keep up.", c: "dim" }]);
+              break;
+            case "joke":
+              line(JOKES[jokeIdx % JOKES.length]);
+              jokeIdx++;
+              break;
+            case "vim": case "vi": case "emacs":
+              line("Opening vim… just kidding. Nobody ever gets out.");
+              break;
+            case "coffee":
+              line("   ( (");
+              line("    ) )");
+              line("  ┌─────┐");
+              line("  │     │]");
+              line("  └─────┘");
+              line("Error 418: I'm a teapot. The developer, however, runs on coffee.");
+              break;
+            case "hack": outQueue = null; hack(); return; /* hack paces itself and calls done() */
+            case "clear":
+              pane.textContent = "";
+              break;
+            case "date":
+              line(new Date().toString().replace(/\s*\(.*\)\s*$/, ""));
+              break;
+            case "exit": case "logout": case "quit":
+              line("logout — just kidding. There's nowhere else to be. Type `help`.");
+              break;
+            case "truong":
+              richLine([{ t: "That's me. Try " }, { t: "man truong", c: "bright" }, { t: "." }]);
+              break;
+            default:
+              line("zsh: command not found: " + input + " — type `help`.");
+          }
+          finish();
+        }
+
+        /* ---------- boot ---------- */
+        /* "truongOS" in the big_money-se figlet style ($ clusters),
+           matching the reference the owner supplied. */
+        var ART_LINES = [
+          "   __                                                         ______    ______",
+          "  |  \\                                                       /      \\  /      \\",
+          " _| $$_     ______   __    __   ______   _______    ______  |  $$$$$$\\|  $$$$$$\\",
+          "|   $$ \\   /      \\ |  \\  |  \\ /      \\ |       \\  /      \\ | $$  | $$| $$___\\$$",
+          " \\$$$$$$  |  $$$$$$\\| $$  | $$|  $$$$$$\\| $$$$$$$\\|  $$$$$$\\| $$  | $$ \\$$    \\",
+          "  | $$ __ | $$   \\$$| $$  | $$| $$  | $$| $$  | $$| $$  | $$| $$  | $$ _\\$$$$$$\\",
+          "  | $$|  \\| $$      | $$__/ $$| $$__/ $$| $$  | $$| $$__| $$| $$__/ $$|  \\__| $$",
+          "   \\$$  $$| $$       \\$$    $$ \\$$    $$| $$  | $$ \\$$    $$ \\$$    $$ \\$$    $$",
+          "    \\$$$$  \\$$        \\$$$$$$   \\$$$$$$  \\$$   \\$$ _\\$$$$$$$  \\$$$$$$   \\$$$$$$",
+          "                                                  |  \\__| $$",
+          "                                                   \\$$    $$",
+          "                                                    \\$$$$$$"
+        ];
+
+        /* Minimal boot: one sentence + the ASCII wordmark. Everything else
+           about Truong is discovered through commands. */
+        function bootLines() {
+          return [
+            function () { line("Welcome to truongOS 1.0", "bright"); },
+            function () { line(ART_LINES.join("\n"), "ascii"); }
+          ];
+        }
+
+        function boot() {
+          if (booted) return;
+          booted = true;
+          var steps = bootLines();
+          if (reduceMotion) {
+            steps.forEach(function (fn) { fn(); });
+            makePrompt();
+            return;
+          }
+          var delays = [80, 420];
+          var timers = [];
+          var printed = 0;
+          function disarmSkip() {
+            window.removeEventListener("pointerdown", skip);
+            window.removeEventListener("keydown", skip);
+          }
+          steps.forEach(function (fn, i) {
+            timers.push(setTimeout(function () {
+              if (bootSkipped || i < printed) return;
+              fn();
+              printed = i + 1;
+              if (i === steps.length - 1) { disarmSkip(); makePrompt(); }
+            }, delays[i] || 1400));
+          });
+          function skip() {
+            if (bootSkipped) return;
+            bootSkipped = true;
+            disarmSkip();
+            timers.forEach(clearTimeout);
+            for (var i = printed; i < steps.length; i++) steps[i]();
+            printed = steps.length;
+            makePrompt();
+          }
+          window.addEventListener("pointerdown", skip);
+          window.addEventListener("keydown", skip);
+          setTimeout(function () { /* safety: prompt by ~2.1s even if a step was skipped */ if (!currentInput && !bootSkipped) { /* steps handle it */ } }, 2200);
+        }
+
+        /* ---------- wiring ---------- */
+        stage.addEventListener("click", function (ev) {
+          if (ev.target.closest("a")) return;
+          focusInput();
+        });
+
+        if (window.visualViewport) {
+          var vv = window.visualViewport;
+          var applyVv = function () { stage.style.height = vv.height + "px"; };
+          vv.addEventListener("resize", applyVv);
+          applyVv();
+        }
+
+        /* ---------- config first (fast), then boot ---------- */
+        var bootStarted = false;
+        function start() { if (!bootStarted) { bootStarted = true; boot(); } }
+        fetch("id-config.json", { cache: "no-store" })
+          .then(function (res) { if (!res.ok) throw new Error("no config"); return res.json(); })
+          .then(function (data) {
+            cfg = Object.assign({}, DEFAULTS, data || {});
+            if (cfg.pageTitle) document.title = cfg.pageTitle;
+          })
+          .catch(function () {})
+          .then(start);
+        setTimeout(start, 700);
+      })();
+    </script>
+  </body>
+</html>
