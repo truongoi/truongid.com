@@ -60,6 +60,23 @@
       }
       tr.week .en { font-size: 13px; font-weight: 400; color: #6b8f71; }
       tr.sub td { background: #faf8f2; font-weight: 600; }
+      .calc { background: #ffffff; border: 1px solid #e5dfd2; border-radius: 14px; padding: 16px; }
+      .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .calc label { display: block; font-size: 16px; color: #6b665c; margin-bottom: 4px; }
+      .calc label .opt { font-size: 13px; }
+      .calc input {
+        width: 100%; font: inherit; font-size: 18px; padding: 10px 12px;
+        border: 1px solid #ddd6c4; border-radius: 10px; background: #ffffff; color: #22201c;
+      }
+      .calc button {
+        width: 100%; margin-top: 14px; font: inherit; font-weight: 700; padding: 12px;
+        border: 0; border-radius: 10px; background: #2e5339; color: #ffffff; cursor: pointer;
+      }
+      .calc-out { margin-top: 14px; border-top: 1px solid #f0ebdf; padding-top: 12px; }
+      .calc-out p { margin: 4px 0; }
+      .calc-big { font-size: 24px; font-weight: 700; }
+      .calc-err { color: #b3261e; }
+      .calc-note { font-size: 14px; color: #8a857a; margin: 12px 0 0; }
       .pin { color: #45423c; white-space: nowrap; }
       footer { text-align: center; color: #8a857a; font-size: 14px; margin-top: 30px; }
       @media (max-width: 520px) {
@@ -92,6 +109,31 @@
           <p class="detail">27.90 kWh · 1 lần sạc</p>
         </div>
       </section>
+
+      <h2>Tính theo kỳ hóa đơn <span class="en">— Bill period calculator</span></h2>
+      <div class="calc">
+        <div class="calc-grid">
+          <div>
+            <label for="c-from">Từ ngày</label>
+            <input id="c-from" type="date" />
+          </div>
+          <div>
+            <label for="c-to">Đến ngày</label>
+            <input id="c-to" type="date" />
+          </div>
+          <div>
+            <label for="c-total">Tổng tiền điện ($)</label>
+            <input id="c-total" type="number" inputmode="decimal" min="0" step="0.01" placeholder="393.76" />
+          </div>
+          <div>
+            <label for="c-heads">Số người <span class="opt">(không bắt buộc)</span></label>
+            <input id="c-heads" type="number" inputmode="numeric" min="1" step="1" placeholder="4" />
+          </div>
+        </div>
+        <button id="c-go" type="button">Tính</button>
+        <div id="c-out" class="calc-out" hidden></div>
+        <p class="calc-note">Nhập đúng kỳ in trên hóa đơn SCE. Mỗi lần sạc được tính vào kỳ theo ngày kết thúc sạc.</p>
+      </div>
 
       <h2>Dòng thời gian <span class="en">— Timeline by week</span></h2>
       <table>
@@ -132,5 +174,56 @@
         <p>Trang này chỉ dành cho gia đình. · This page is for family only.</p>
       </footer>
     </div>
+    <script>
+      /* Session data mirrors functions/_lib/ev-data.js (date = charging END
+         date, the billing convention). Regenerate together with the table. */
+      var SESSIONS = [
+        { d: "2026-09-20", kwh: 44.16, cost: 10.60 },
+        { d: "2026-09-22", kwh: 37.44, cost: 8.99 },
+        { d: "2026-09-25", kwh: 39.80, cost: 9.55 },
+        { d: "2026-09-28", kwh: 43.80, cost: 10.51 },
+        { d: "2026-10-03", kwh: 73.40, cost: 17.62 },
+        { d: "2026-10-06", kwh: 60.40, cost: 14.50 },
+        { d: "2026-10-06", kwh: 3.20, cost: 0.77 },
+        { d: "2026-10-07", kwh: 33.20, cost: 7.97 },
+        { d: "2026-10-08", kwh: 44.10, cost: 10.58 },
+        { d: "2026-10-11", kwh: 49.90, cost: 11.98 },
+        { d: "2026-10-13", kwh: 12.20, cost: 2.93 },
+        { d: "2026-10-14", kwh: 46.20, cost: 11.09 },
+        { d: "2026-10-18", kwh: 47.80, cost: 11.47 },
+        { d: "2026-10-19", kwh: 27.90, cost: 6.70 }
+      ];
+      function money(n) { return "$" + (Math.round(n * 100) / 100).toFixed(2); }
+      document.getElementById("c-go").addEventListener("click", function () {
+        var from = document.getElementById("c-from").value;
+        var to = document.getElementById("c-to").value;
+        var total = parseFloat(document.getElementById("c-total").value);
+        var heads = parseInt(document.getElementById("c-heads").value, 10);
+        var out = document.getElementById("c-out");
+        out.hidden = false;
+        if (!from || !to || isNaN(total)) {
+          out.innerHTML = '<p class="calc-err">Nhập đủ: từ ngày, đến ngày và tổng tiền điện.</p>';
+          return;
+        }
+        if (to < from) {
+          out.innerHTML = '<p class="calc-err">Ngày kết thúc phải sau ngày bắt đầu.</p>';
+          return;
+        }
+        var n = 0, kwh = 0, cost = 0;
+        SESSIONS.forEach(function (s) {
+          if (s.d >= from && s.d <= to) { n++; kwh += s.kwh; cost += s.cost; }
+        });
+        kwh = Math.round(kwh * 100) / 100;
+        cost = Math.round(cost * 100) / 100;
+        var rest = Math.round((total - cost) * 100) / 100;
+        var html = "";
+        if (n === 0) html += "<p>Không có lần sạc nào trong kỳ này.</p>";
+        else html += "<p>Sạc xe trong kỳ: <strong>" + n + " lần · " + kwh.toFixed(2) + " kWh · " + money(cost) + "</strong></p>";
+        html += '<p class="calc-big">Còn lại: ' + money(rest) + "</p>";
+        if (rest < 0) html += '<p class="calc-err">Số tiền còn lại bị âm — kiểm tra lại kỳ ngày hoặc tổng tiền điện.</p>';
+        if (heads > 0) html += "<p>Chia cho " + heads + " người: <strong>" + money(rest / heads) + "</strong> mỗi người</p>";
+        out.innerHTML = html;
+      });
+    </script>
   </body>
 </html>
