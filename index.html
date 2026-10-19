@@ -680,13 +680,19 @@
             if (!byKey[k]) { byKey[k] = { wk: isoWeek(s.date), items: [] }; groups.push(byKey[k]); }
             byKey[k].items.push(s);
           });
-          groups.slice(0, 3).forEach(function (g, gi) {
+          var shown = groups.slice(0, 3);
+          /* Battery-% column only appears when a shown session has one;
+             otherwise the rows stay compact so brace + total fit one line. */
+          var showPct = shown.some(function (g) {
+            return g.items.some(function (s) { return s.startPct !== null && s.startPct !== undefined; });
+          });
+          shown.forEach(function (g, gi) {
             if (gi > 0) blank();
             var n = g.items.length;
-            var totKwh = 0, totCost = 0;
-            g.items.forEach(function (s) { totKwh += Number(s.kwh); totCost += Number(s.cost); });
+            var totCost = 0;
+            g.items.forEach(function (s) { totCost += Number(s.cost); });
             /* The total hangs on the brace's tip: the middle row for odd
-               counts, the closing row for even counts. */
+               counts, the closing row for even counts. Money only. */
             var totalRow = n === 1 ? 0 : (n % 2 === 1 ? Math.floor(n / 2) : n - 1);
             g.items.forEach(function (s, i) {
               var pct = (s.startPct === null || s.startPct === undefined) ? "\u2014" : (s.startPct + "%\u2192" + s.endPct + "%");
@@ -702,13 +708,11 @@
               else if (i === totalRow) glyph = "\u23AC";
               else glyph = "\u23AA";
               if (i === totalRow) {
-                var tk = (Math.round(totKwh * 100) / 100).toFixed(2);
-                while (tk.length < 5) tk = " " + tk;
                 var ta = fmtMoney(Math.round(totCost * 100) / 100);
                 while (ta.length < 6) ta = " " + ta;
-                tail = "  " + tk + " kWh  " + ta;
+                tail = "  " + ta;
               }
-              line("  W" + g.wk + "  " + s.date + "  " + pct + "  " + kwh + " kWh  " + amt + "  " + glyph + tail);
+              line("  W" + g.wk + "  " + s.date.slice(5) + (showPct ? "  " + pct : "") + "  " + kwh + "  " + amt + "  " + glyph + tail);
             });
           });
           blank();
