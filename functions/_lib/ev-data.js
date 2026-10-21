@@ -6,7 +6,8 @@
  *
  * startPct/endPct are null where the log does not record battery percentages
  * (all October sessions log charger times instead; 2026-09-28 records neither).
- * Regenerate this module whenever a new session is reported. */
+ * Regenerate this module whenever a new session is reported.
+ * Latest: session 15 (2026-10-21, 56.90 kWh metered). */
 
 export const EV_DATA = {
   updatedAt: "2026-10-21",
