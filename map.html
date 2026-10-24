@@ -6,16 +6,18 @@
 <meta name="robots" content="noindex" />
 <title>Southern California Cities — Interactive Map · truongid</title>
 <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --ink: #26221c;
-    --paper: #fffdf8;
-    --accent: #b3541e;
-    --sel: #ffb703;
+    --ink: #2e4634;
+    --ink2: #26221c;
+    --paper: #fffdf4;
+    --grass: #58a05c;
+    --accent: #e4572e;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink); }
-  #map { position: fixed; inset: 0; }
+  html, body { margin: 0; height: 100%; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink2); }
+  #map { position: fixed; inset: 0; background: #7ecfe8; }
   .maplibregl-ctrl-attrib { font-size: 10px; }
 
   /* top bar: title + search */
@@ -26,75 +28,105 @@
   }
   .topbar > * { pointer-events: auto; }
   .title {
-    align-self: flex-start; background: var(--paper); border: 2px solid var(--ink); border-radius: 10px;
-    box-shadow: 3px 3px 0 var(--ink); padding: 6px 12px; font-weight: 800; font-size: 15px;
+    align-self: flex-start; background: var(--paper); border: 2px solid var(--ink2); border-radius: 14px;
+    box-shadow: 3px 3px 0 var(--ink2); padding: 6px 14px;
+    font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 17px; color: var(--ink);
   }
-  .title small { display: block; font-weight: 600; font-size: 11px; color: #6b6257; }
+  .title small { display: block; font-weight: 700; font-size: 11px; color: #7a7263; }
   .search { position: relative; }
   .search input {
-    width: 100%; height: 44px; border: 2px solid var(--ink); border-radius: 10px; background: var(--paper);
-    box-shadow: 3px 3px 0 var(--ink); font-size: 16px; padding: 0 14px; outline: none;
+    width: 100%; height: 44px; border: 2px solid var(--ink2); border-radius: 14px; background: var(--paper);
+    box-shadow: 3px 3px 0 var(--ink2); font-size: 16px; padding: 0 14px; outline: none;
+    font-family: "Baloo 2", sans-serif; font-weight: 600;
   }
   .results {
-    position: absolute; top: 50px; left: 0; right: 0; background: var(--paper); border: 2px solid var(--ink);
-    border-radius: 10px; box-shadow: 3px 3px 0 var(--ink); overflow: hidden; display: none; max-height: 46vh; overflow-y: auto;
+    position: absolute; top: 50px; left: 0; right: 0; background: var(--paper); border: 2px solid var(--ink2);
+    border-radius: 14px; box-shadow: 3px 3px 0 var(--ink2); overflow: hidden; display: none; max-height: 46vh; overflow-y: auto;
   }
   .results button {
     display: flex; justify-content: space-between; gap: 10px; width: 100%; text-align: left; background: none;
-    border: 0; border-bottom: 1px solid #e7ddcb; padding: 11px 14px; font-size: 15px; cursor: pointer; color: var(--ink);
+    border: 0; border-bottom: 1px solid #e7ddcb; padding: 11px 14px; font-size: 15px; cursor: pointer; color: var(--ink2);
   }
   .results button:last-child { border-bottom: 0; }
-  .results .c { color: #6b6257; font-size: 13px; white-space: nowrap; }
+  .results .c { color: #7a7263; font-size: 13px; white-space: nowrap; }
 
   /* legend */
   .legend {
     position: fixed; left: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 9;
-    background: var(--paper); border: 2px solid var(--ink); border-radius: 10px; box-shadow: 3px 3px 0 var(--ink);
-    padding: 7px 10px; font-size: 11px; font-weight: 700;
+    background: var(--paper); border: 2px solid var(--ink2); border-radius: 14px; box-shadow: 3px 3px 0 var(--ink2);
+    padding: 7px 10px; font-size: 11px; font-weight: 700; color: var(--ink);
+    font-family: "Baloo 2", sans-serif;
   }
-  .legend .bar { height: 8px; width: 148px; border-radius: 4px; margin: 4px 0 2px;
-    background: linear-gradient(90deg, #f6e7c8, #eab676, #d97b36, #8a3b12); border: 1px solid var(--ink); }
-  .legend .scale { display: flex; justify-content: space-between; color: #6b6257; font-weight: 600; }
+  .legend .bar { height: 9px; width: 148px; border-radius: 5px; margin: 4px 0 2px;
+    background: linear-gradient(90deg, #dcf2a0, #8fd14f, #ffc93c, #ff8a3c, #ef5350); border: 1.5px solid var(--ink2); }
+  .legend .scale { display: flex; justify-content: space-between; color: #7a7263; font-weight: 700; }
+
+  /* landmarks + selection flag */
+  .lm {
+    width: 30px; height: 30px; border-radius: 50%; background: var(--paper);
+    border: 2px solid var(--ink2); box-shadow: 2px 2px 0 var(--ink2);
+    display: grid; place-items: center; pointer-events: none;
+    animation: lm-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  .lm svg { width: 18px; height: 18px; display: block; }
+  @keyframes lm-pop { from { transform: scale(0); } to { transform: scale(1); } }
+  .flag { pointer-events: none; animation: flag-drop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  @keyframes flag-drop { from { transform: translateY(-14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
   /* info sheet */
   .sheet {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 11; background: var(--paper);
-    border-top: 2px solid var(--ink); border-radius: 16px 16px 0 0; box-shadow: 0 -4px 0 rgba(38,34,28,0.85);
+    border-top: 2px solid var(--ink2); border-radius: 18px 18px 0 0; box-shadow: 0 -4px 0 rgba(38,34,28,0.85);
     padding: 10px 18px calc(14px + env(safe-area-inset-bottom));
-    transform: translateY(105%); transition: transform 0.28s ease; max-height: 52vh; overflow-y: auto;
+    transform: translateY(105%); transition: transform 0.3s cubic-bezier(0.34, 1.3, 0.64, 1); max-height: 54vh; overflow-y: auto;
   }
   .sheet.open { transform: translateY(0); }
-  .sheet .grip { width: 44px; height: 5px; border-radius: 3px; background: #d8cbb2; margin: 0 auto 8px; }
-  .sheet h2 { margin: 0 40px 2px 0; font-size: 22px; line-height: 1.15; }
-  .sheet .county { color: #6b6257; font-size: 14px; font-weight: 600; margin: 0 0 10px; }
+  .sheet .grip { width: 44px; height: 5px; border-radius: 3px; background: #d8cbb2; margin: 0 auto 10px; }
+  .sheet h2 {
+    display: inline-block; margin: 0 44px 4px 0; font-family: "Baloo 2", sans-serif; font-size: 23px; line-height: 1.15;
+    background: var(--grass); color: #fffdf4; padding: 3px 14px 5px; border: 2px solid var(--ink2);
+    border-radius: 10px; box-shadow: 2px 2px 0 var(--ink2); transform: rotate(-1.2deg);
+    text-shadow: 0 1px 0 rgba(0,0,0,0.25);
+  }
+  .sheet .county { color: #7a7263; font-size: 14px; font-weight: 700; margin: 4px 0 10px; font-family: "Baloo 2", sans-serif; }
   .sheet .close {
     position: absolute; top: 10px; right: 12px; width: 34px; height: 34px; border-radius: 50%;
-    border: 2px solid var(--ink); background: var(--paper); font-size: 16px; font-weight: 800; cursor: pointer; line-height: 1;
+    border: 2px solid var(--ink2); background: var(--paper); font-size: 15px; font-weight: 800; cursor: pointer; line-height: 1;
   }
   .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
-  .field { background: #f7efdd; border: 1.5px solid var(--ink); border-radius: 10px; padding: 8px 12px; }
+  .field { background: #f3ecd7; border: 1.5px solid var(--ink2); border-radius: 12px; padding: 8px 12px; }
   .field.wide { grid-column: 1 / -1; }
-  .field .k { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #6b6257; }
-  .field .v { font-size: 18px; font-weight: 800; margin-top: 1px; }
-  .field .v.small { font-size: 14px; font-weight: 600; line-height: 1.45; word-break: break-word; }
-  .sheet .note { font-size: 12px; color: #6b6257; margin: 8px 0 0; line-height: 1.5; }
+  .field .k { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #7a7263; }
+  .field .v { font-size: 18px; font-weight: 800; margin-top: 1px; font-family: "Baloo 2", sans-serif; }
+  .field .v.small { font-size: 14px; font-weight: 600; line-height: 1.45; word-break: break-word; font-family: inherit; }
+  .sheet .note { font-size: 12px; color: #7a7263; margin: 8px 0 0; line-height: 1.5; }
   .sheet .note-btn {
     margin-top: 12px; padding: 0; background: none; border: 0; cursor: pointer;
-    font-size: 12px; font-weight: 700; color: #6b6257; text-decoration: underline; text-underline-offset: 3px;
+    font-size: 12px; font-weight: 700; color: #7a7263; text-decoration: underline; text-underline-offset: 3px;
   }
 
   .loading {
-    position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: #f1e8d8;
-    font-weight: 700; font-size: 16px; text-align: center; padding: 20px;
+    position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: #a5ddf5;
+    font-family: "Baloo 2", sans-serif; font-weight: 800; font-size: 18px; color: var(--ink); text-align: center; padding: 20px;
   }
   .loading[hidden] { display: none; }
+  .loading .block {
+    width: 22px; height: 22px; margin: 0 auto 12px; background: #ffc93c;
+    border: 2.5px solid var(--ink2); border-radius: 6px; box-shadow: 2px 2px 0 var(--ink2);
+    animation: blk 0.7s ease-in-out infinite alternate;
+  }
+  @keyframes blk { from { transform: translateY(0) rotate(-4deg); } to { transform: translateY(-14px) rotate(5deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .lm, .flag, .loading .block { animation: none; }
+    .sheet { transition: none; }
+  }
 </style>
 </head>
 <body>
 <div id="map"></div>
 
 <div class="topbar">
-  <div class="title">Southern California Cities<small>217 incorporated cities · 8 counties — tap a city</small></div>
+  <div class="title">🌴 Southern California Cities<small>217 cities · 8 counties — tap a city tile</small></div>
   <div class="search">
     <input id="q" type="search" placeholder="Search a city… (e.g. Santa Ana)" autocomplete="off" />
     <div class="results" id="results"></div>
@@ -115,16 +147,16 @@
   <button class="note-btn" id="note-btn" aria-expanded="false">About this data ▾</button>
   <p class="note" id="note" hidden>Sales tax: CDTFA city rates effective Oct 1, 2026. A few areas have district
   taxes that vary by address — the CDTFA lookup gives an exact address rate. Population: 2020 Census.
-  ZIP codes shown by centroid. Boundaries: U.S. Census Bureau.</p>
+  ZIP codes shown by centroid. Boundaries: U.S. Census Bureau. Base map © OpenStreetMap contributors.</p>
 </section>
 
-<div class="loading" id="loading">Loading the map…</div>
+<div class="loading" id="loading"><div><div class="block"></div>Loading the map…</div></div>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script>
 (function () {
   var loading = document.getElementById('loading');
-  function fail(msg) { loading.hidden = false; loading.textContent = msg; }
+  function fail(msg) { loading.hidden = false; loading.innerHTML = ''; loading.textContent = msg; }
 
   if (!window.maplibregl) { fail('Map library failed to load — check your connection and reload.'); return; }
 
@@ -144,7 +176,7 @@
 
   var map = new maplibregl.Map({
     container: 'map',
-    style: 'https://tiles.openfreemap.org/styles/positron',
+    style: 'https://tiles.openfreemap.org/styles/liberty',
     center: [-117.55, 33.95],
     zoom: 7.3,
     pitch: 45,
@@ -157,20 +189,105 @@
   window.__cityMap = map;
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
   map.touchZoomRotate.enable();
-  if (map.dragRotate) { /* two-finger rotate stays available on touch */ }
+
+  /* ---------- storybook recolor of the vector basemap ---------- */
+  function paint(id, prop, value) {
+    try { map.setPaintProperty(id, prop, value); } catch (e) { /* layer shape differs — skip */ }
+  }
+  function recolor() {
+    var style = map.getStyle();
+    if (!style || !style.layers) return;
+    style.layers.forEach(function (l) {
+      var id = l.id, sl = l['source-layer'] || '';
+      if (id === 'natural_earth') { try { map.setLayoutProperty(id, 'visibility', 'none'); } catch (e) {} return; }
+      if (l.type === 'background') paint(id, 'background-color', '#a9d97e');
+      else if (sl === 'water' && l.type === 'fill') paint(id, 'fill-color', '#45c8e8');
+      else if (sl === 'waterway' && l.type === 'line') paint(id, 'line-color', '#45c8e8');
+      else if (id === 'park' || sl === 'park') paint(id, 'fill-color', '#79c76f');
+      else if (id === 'landcover_wood') paint(id, 'fill-color', '#5cab60');
+      else if (id === 'landcover_grass') paint(id, 'fill-color', '#b7e29a');
+      else if (id === 'landcover_sand') paint(id, 'fill-color', '#f7e3a1');
+      else if (id === 'landcover_ice' || id === 'landcover_wetland') paint(id, 'fill-color', '#cdeeb0');
+      else if (id === 'landuse_residential') paint(id, 'fill-color', '#b9e29a');
+      else if (sl === 'landuse' && l.type === 'fill') paint(id, 'fill-color', '#a5d68f');
+      else if (sl === 'building' && l.type === 'fill') paint(id, 'fill-color', '#ffcc9e');
+      else if (sl === 'aeroway' && l.type === 'fill') paint(id, 'fill-color', '#d7dee2');
+      else if (l.type === 'line' && /casing/.test(id)) paint(id, 'line-color', '#ffffff');
+      else if (l.type === 'line' && /motorway/.test(id) && sl === 'transportation') paint(id, 'line-color', '#ffb74d');
+      else if (l.type === 'line' && /(trunk_primary|secondary_tertiary)/.test(id)) paint(id, 'line-color', '#ffe3ae');
+      else if (l.type === 'line' && sl === 'transportation' && !/rail|hatching|arrow/.test(id)) paint(id, 'line-color', '#fff6e0');
+      else if (l.type === 'symbol' && l.layout && l.layout['text-field']) {
+        paint(id, 'text-color', '#2e5939');
+        paint(id, 'text-halo-color', '#fffdf4');
+        paint(id, 'text-halo-width', 1.5);
+      }
+    });
+  }
+
+  /* ---------- landmarks (storybook sprinkles) ---------- */
+  var G = {
+    castle: '<svg viewBox="0 0 24 24" fill="#7b5ea7"><path d="M4 21V9h2.5V6h2v3h2V6h3v3h2V6h2v3H20v12h-5.5v-3.6a2.5 2.5 0 0 0-5 0V21z"/></svg>',
+    star: '<svg viewBox="0 0 24 24" fill="#f4b400"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg>',
+    plane: '<svg viewBox="0 0 24 24" fill="#4a6fa5"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>',
+    ship: '<svg viewBox="0 0 24 24" fill="#e4572e"><path d="M3 14h18l-1.8 5.2a2 2 0 0 1-1.9 1.3H6.7a2 2 0 0 1-1.9-1.3z"/><path d="M8.5 8h3v5h-3zM13.5 10h4v3h-4z" fill="#2e4634"/></svg>',
+    wheel: '<svg viewBox="0 0 24 24" fill="none" stroke="#00897b" stroke-width="1.9"><circle cx="12" cy="10" r="7"/><path d="M12 3v14M5 10h14M7.2 5.2l9.6 9.6M16.8 5.2l-9.6 9.6M8.5 21L12 16.5 15.5 21"/></svg>',
+    whale: '<svg viewBox="0 0 24 24" fill="#039be5"><path d="M2.5 15.5C4.3 11 8.3 8.5 12.8 8.5c4.8 0 8 2.7 8.2 5.7 0 1-.8 1.8-1.9 1.8h-2.7l-2.1 3-1.2-3c-4.2.2-8.4-.4-10.6-.5z"/><path d="M8 5.2c0-1 .8-1.7 1.7-2M11.5 5c.2-1.1 1.1-1.9 2.2-2" stroke="#039be5" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>',
+    panda: '<svg viewBox="0 0 24 24"><circle cx="6" cy="5.8" r="2.5" fill="#37474f"/><circle cx="18" cy="5.8" r="2.5" fill="#37474f"/><circle cx="12" cy="12.5" r="8" fill="#37474f"/><circle cx="12" cy="13" r="6.1" fill="#fffdf4"/><ellipse cx="9.6" cy="12" rx="1.5" ry="1.9" fill="#37474f" transform="rotate(-15 9.6 12)"/><ellipse cx="14.4" cy="12" rx="1.5" ry="1.9" fill="#37474f" transform="rotate(15 14.4 12)"/><circle cx="9.8" cy="11.8" r="0.55" fill="#fff"/><circle cx="14.2" cy="11.8" r="0.55" fill="#fff"/><ellipse cx="12" cy="14.6" rx="1.1" ry="0.8" fill="#37474f"/></svg>',
+    brick: '<svg viewBox="0 0 24 24" fill="#f6b93b" stroke="#26221c" stroke-width="1.3"><rect x="3.5" y="6" width="8" height="5" rx="1"/><rect x="12.5" y="6" width="8" height="5" rx="1"/><rect x="8" y="12.5" width="8" height="5" rx="1"/></svg>',
+    mountain: '<svg viewBox="0 0 24 24"><path d="M2.5 19.5L9.5 7l3.2 5 2-2.8 6.8 10.3z" fill="#5cab60"/><path d="M9.5 7l1.8 2.9-1.8 1.2-1.7-1.2z" fill="#fffdf4"/></svg>',
+    grapes: '<svg viewBox="0 0 24 24"><path d="M13 3.5c1.8-1.3 4-.9 5 .3-.3 1.9-1.9 3-3.9 2.9" fill="#58a05c"/><g fill="#8e44ad"><circle cx="8" cy="9" r="2.1"/><circle cx="12.4" cy="9" r="2.1"/><circle cx="16.8" cy="9" r="2.1"/><circle cx="10.2" cy="12.8" r="2.1"/><circle cx="14.6" cy="12.8" r="2.1"/><circle cx="12.4" cy="16.6" r="2.1"/></g></svg>',
+    windmill: '<svg viewBox="0 0 24 24" fill="none" stroke="#607d8b" stroke-width="1.9" stroke-linecap="round"><path d="M12 9.5V3.5M12 9.5l5.5-3M12 9.5l3 5.5M12 9.5L6.5 12M12 9.5L9 15"/><path d="M10.8 21l1.2-11.5L13.2 21"/></svg>',
+    umbrella: '<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 1 9 9H3a9 9 0 0 1 9-9z" fill="#ff7043"/><path d="M12 12v6a2.4 2.4 0 0 1-4.8 0" fill="none" stroke="#26221c" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  };
+  var LANDMARKS = [
+    { at: [-118.498, 34.008], icon: 'wheel', name: 'Santa Monica Pier' },
+    { at: [-118.339, 34.102], icon: 'star', name: 'Hollywood' },
+    { at: [-118.408, 33.941], icon: 'plane', name: 'LAX' },
+    { at: [-118.190, 33.753], icon: 'ship', name: 'Port of Long Beach' },
+    { at: [-117.919, 33.812], icon: 'castle', name: 'Disneyland · Anaheim' },
+    { at: [-117.868, 33.676], icon: 'plane', name: 'John Wayne Airport' },
+    { at: [-118.006, 33.659], icon: 'umbrella', name: 'Huntington Beach' },
+    { at: [-117.698, 33.461], icon: 'whale', name: 'Dana Point' },
+    { at: [-117.325, 33.128], icon: 'brick', name: 'LEGOLAND · Carlsbad' },
+    { at: [-117.151, 32.736], icon: 'panda', name: 'San Diego Zoo' },
+    { at: [-117.148, 33.494], icon: 'grapes', name: 'Temecula wine country' },
+    { at: [-116.912, 34.244], icon: 'mountain', name: 'Big Bear Lake' },
+    { at: [-116.546, 33.897], icon: 'windmill', name: 'Palm Springs wind farms' },
+  ];
+  function addLandmarks() {
+    LANDMARKS.forEach(function (lm, i) {
+      var el = document.createElement('div');
+      el.className = 'lm';
+      el.style.animationDelay = (i * 0.06) + 's';
+      el.innerHTML = G[lm.icon];
+      el.title = lm.name;
+      new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(lm.at).addTo(map);
+    });
+  }
+
+  /* ---------- selection flag ---------- */
+  var flagEl = document.createElement('div');
+  flagEl.className = 'flag';
+  flagEl.innerHTML = '<svg width="30" height="38" viewBox="0 0 30 38"><rect x="4" y="4" width="3" height="30" rx="1.5" fill="#26221c"/><path d="M7 4h17l-4.5 5.5L24 15H7z" fill="#e4572e" stroke="#26221c" stroke-width="1.6"/></svg>';
+  var flag = new maplibregl.Marker({ element: flagEl, anchor: 'bottom-left' });
+  var flagShown = false;
 
   var cities = null, selectedId = '';
 
+  function tileHeight(extra) {
+    return ['+', 120 + (extra || 0),
+      ['*', ['-', ['coalesce', ['get', 'tax'], 7.25], 7.25], 130]];
+  }
   function setSelected(id) {
     selectedId = id || '';
     var f = ['==', ['get', 'id'], selectedId];
     if (map.getLayer('city-selected')) map.setFilter('city-selected', f);
-    if (map.getLayer('city-selected-line')) map.setFilter('city-selected-line', f);
+    if (!selectedId && flagShown) { flag.remove(); flagShown = false; }
   }
 
   function openSheet(p) {
     document.getElementById('f-name').textContent = p.name;
-    document.getElementById('f-county').textContent = p.county + ' County';
+    document.getElementById('f-county').textContent = '📍 ' + p.county + ' County';
     var box = document.getElementById('fields');
     box.innerHTML = '';
     FIELDS.forEach(function (fd) {
@@ -200,10 +317,13 @@
   function select(props, fly) {
     setSelected(props.id);
     openSheet(props);
+    flag.setLngLat([props.lon, props.lat]);
+    if (!flagShown) { flag.addTo(map); flagShown = true; }
     if (fly) map.flyTo({ center: [props.lon, props.lat], zoom: Math.max(map.getZoom(), 10.2), pitch: 45, duration: 900 });
   }
 
   map.on('load', function () {
+    recolor();
     fetch('/cities.geojson')
       .then(function (r) { if (!r.ok) throw new Error('geojson ' + r.status); return r.json(); })
       .then(function (gj) {
@@ -216,26 +336,28 @@
         map.addSource('city-points', { type: 'geojson', data: points });
 
         map.addLayer({
-          id: 'city-fill', type: 'fill', source: 'cities',
+          id: 'city-tiles', type: 'fill-extrusion', source: 'cities',
           paint: {
-            'fill-color': ['interpolate', ['linear'], ['coalesce', ['get', 'tax'], 7.25],
-              7.25, '#f6e7c8', 8.25, '#eab676', 9.25, '#d97b36', 10.75, '#8a3b12'],
-            'fill-opacity': 0.78,
+            'fill-extrusion-color': ['interpolate', ['linear'], ['coalesce', ['get', 'tax'], 7.25],
+              7.25, '#dcf2a0', 8.25, '#8fd14f', 9.0, '#ffc93c', 9.75, '#ff8a3c', 10.75, '#ef5350'],
+            'fill-extrusion-height': tileHeight(0),
+            'fill-extrusion-base': 0,
+            'fill-extrusion-opacity': 0.94,
           },
         });
         map.addLayer({
           id: 'city-line', type: 'line', source: 'cities',
-          paint: { 'line-color': '#3a3428', 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.7, 11, 2], 'line-opacity': 0.85 },
+          paint: { 'line-color': '#33503a', 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.7, 11, 2], 'line-opacity': 0.9 },
         });
         map.addLayer({
-          id: 'city-selected', type: 'fill', source: 'cities',
+          id: 'city-selected', type: 'fill-extrusion', source: 'cities',
           filter: ['==', ['get', 'id'], ''],
-          paint: { 'fill-color': '#ffb703', 'fill-opacity': 0.45 },
-        });
-        map.addLayer({
-          id: 'city-selected-line', type: 'line', source: 'cities',
-          filter: ['==', ['get', 'id'], ''],
-          paint: { 'line-color': '#111111', 'line-width': 3 },
+          paint: {
+            'fill-extrusion-color': '#ffb703',
+            'fill-extrusion-height': tileHeight(340),
+            'fill-extrusion-base': 0,
+            'fill-extrusion-opacity': 1,
+          },
         });
         map.addLayer({
           id: 'city-labels', type: 'symbol', source: 'city-points', minzoom: 8.6,
@@ -243,14 +365,14 @@
             'text-field': ['get', 'name'], 'text-size': ['interpolate', ['linear'], ['zoom'], 8.6, 10, 12, 14],
             'text-font': ['Noto Sans Regular'], 'text-allow-overlap': false,
           },
-          paint: { 'text-color': '#26221c', 'text-halo-color': '#fffdf8', 'text-halo-width': 1.4 },
+          paint: { 'text-color': '#2e5939', 'text-halo-color': '#fffdf4', 'text-halo-width': 1.5 },
         });
 
         map.on('click', function (e) {
           var pad = 7;
           var hits = map.queryRenderedFeatures(
             [[e.point.x - pad, e.point.y - pad], [e.point.x + pad, e.point.y + pad]],
-            { layers: ['city-fill'] });
+            { layers: ['city-tiles'] });
           if (!hits.length) { closeSheet(); return; }
           var best = hits[0], bd = Infinity;
           hits.forEach(function (h) {
@@ -260,14 +382,15 @@
           });
           select(best.properties, false);
         });
-        map.on('mouseenter', 'city-fill', function () { map.getCanvas().style.cursor = 'pointer'; });
-        map.on('mouseleave', 'city-fill', function () { map.getCanvas().style.cursor = ''; });
+        map.on('mouseenter', 'city-tiles', function () { map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', 'city-tiles', function () { map.getCanvas().style.cursor = ''; });
 
+        addLandmarks();
         loading.hidden = true;
       })
       .catch(function (err) { fail('Could not load city data (' + err.message + ').'); });
   });
-  map.on('error', function (e) {
+  map.on('error', function () {
     if (!cities) fail('Map tiles failed to load — check your connection and reload.');
   });
 
