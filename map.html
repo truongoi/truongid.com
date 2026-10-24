@@ -61,16 +61,19 @@
     background: linear-gradient(90deg, #dcf2a0, #8fd14f, #ffc93c, #ff8a3c, #ef5350); border: 1.5px solid var(--ink2); }
   .legend .scale { display: flex; justify-content: space-between; color: #7a7263; font-weight: 700; }
 
-  /* landmarks + selection flag */
+  /* landmarks + selection flag — animations live on INNER elements:
+     animating transform on the marker element itself would override
+     MapLibre's positioning transform and pin every marker at 0,0. */
+  .lm-wrap, .flag-wrap { pointer-events: none; }
   .lm {
     width: 30px; height: 30px; border-radius: 50%; background: var(--paper);
     border: 2px solid var(--ink2); box-shadow: 2px 2px 0 var(--ink2);
-    display: grid; place-items: center; pointer-events: none;
+    display: grid; place-items: center;
     animation: lm-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   }
   .lm svg { width: 18px; height: 18px; display: block; }
   @keyframes lm-pop { from { transform: scale(0); } to { transform: scale(1); } }
-  .flag { pointer-events: none; animation: flag-drop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  .flag { animation: flag-drop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
   @keyframes flag-drop { from { transform: translateY(-14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
   /* info sheet */
@@ -257,18 +260,21 @@
   function addLandmarks() {
     LANDMARKS.forEach(function (lm, i) {
       var el = document.createElement('div');
-      el.className = 'lm';
-      el.style.animationDelay = (i * 0.06) + 's';
-      el.innerHTML = G[lm.icon];
-      el.title = lm.name;
+      el.className = 'lm-wrap';
+      var inner = document.createElement('div');
+      inner.className = 'lm';
+      inner.style.animationDelay = (i * 0.06) + 's';
+      inner.innerHTML = G[lm.icon];
+      inner.title = lm.name;
+      el.appendChild(inner);
       new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(lm.at).addTo(map);
     });
   }
 
   /* ---------- selection flag ---------- */
   var flagEl = document.createElement('div');
-  flagEl.className = 'flag';
-  flagEl.innerHTML = '<svg width="30" height="38" viewBox="0 0 30 38"><rect x="4" y="4" width="3" height="30" rx="1.5" fill="#26221c"/><path d="M7 4h17l-4.5 5.5L24 15H7z" fill="#e4572e" stroke="#26221c" stroke-width="1.6"/></svg>';
+  flagEl.className = 'flag-wrap';
+  flagEl.innerHTML = '<div class="flag"><svg width="30" height="38" viewBox="0 0 30 38"><rect x="4" y="4" width="3" height="30" rx="1.5" fill="#26221c"/><path d="M7 4h17l-4.5 5.5L24 15H7z" fill="#e4572e" stroke="#26221c" stroke-width="1.6"/></svg></div>';
   var flag = new maplibregl.Marker({ element: flagEl, anchor: 'bottom-left' });
   var flagShown = false;
 
