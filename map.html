@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex" />
+<title>Southern California Cities — Interactive Map · truongid</title>
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #26221c;
+    --paper: #fffdf8;
+    --accent: #b3541e;
+    --sel: #ffb703;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink); }
+  #map { position: fixed; inset: 0; }
+  .maplibregl-ctrl-attrib { font-size: 10px; }
+
+  /* top bar: title + search */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+    padding: calc(8px + env(safe-area-inset-top)) 10px 8px;
+    display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+  }
+  .topbar > * { pointer-events: auto; }
+  .title {
+    align-self: flex-start; background: var(--paper); border: 2px solid var(--ink); border-radius: 10px;
+    box-shadow: 3px 3px 0 var(--ink); padding: 6px 12px; font-weight: 800; font-size: 15px;
+  }
+  .title small { display: block; font-weight: 600; font-size: 11px; color: #6b6257; }
+  .search { position: relative; }
+  .search input {
+    width: 100%; height: 44px; border: 2px solid var(--ink); border-radius: 10px; background: var(--paper);
+    box-shadow: 3px 3px 0 var(--ink); font-size: 16px; padding: 0 14px; outline: none;
+  }
+  .results {
+    position: absolute; top: 50px; left: 0; right: 0; background: var(--paper); border: 2px solid var(--ink);
+    border-radius: 10px; box-shadow: 3px 3px 0 var(--ink); overflow: hidden; display: none; max-height: 46vh; overflow-y: auto;
+  }
+  .results button {
+    display: flex; justify-content: space-between; gap: 10px; width: 100%; text-align: left; background: none;
+    border: 0; border-bottom: 1px solid #e7ddcb; padding: 11px 14px; font-size: 15px; cursor: pointer; color: var(--ink);
+  }
+  .results button:last-child { border-bottom: 0; }
+  .results .c { color: #6b6257; font-size: 13px; white-space: nowrap; }
+
+  /* legend */
+  .legend {
+    position: fixed; left: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 9;
+    background: var(--paper); border: 2px solid var(--ink); border-radius: 10px; box-shadow: 3px 3px 0 var(--ink);
+    padding: 7px 10px; font-size: 11px; font-weight: 700;
+  }
+  .legend .bar { height: 8px; width: 148px; border-radius: 4px; margin: 4px 0 2px;
+    background: linear-gradient(90deg, #f6e7c8, #eab676, #d97b36, #8a3b12); border: 1px solid var(--ink); }
+  .legend .scale { display: flex; justify-content: space-between; color: #6b6257; font-weight: 600; }
+
+  /* info sheet */
+  .sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 11; background: var(--paper);
+    border-top: 2px solid var(--ink); border-radius: 16px 16px 0 0; box-shadow: 0 -4px 0 rgba(38,34,28,0.85);
+    padding: 10px 18px calc(14px + env(safe-area-inset-bottom));
+    transform: translateY(105%); transition: transform 0.28s ease; max-height: 52vh; overflow-y: auto;
+  }
+  .sheet.open { transform: translateY(0); }
+  .sheet .grip { width: 44px; height: 5px; border-radius: 3px; background: #d8cbb2; margin: 0 auto 8px; }
+  .sheet h2 { margin: 0 40px 2px 0; font-size: 22px; line-height: 1.15; }
+  .sheet .county { color: #6b6257; font-size: 14px; font-weight: 600; margin: 0 0 10px; }
+  .sheet .close {
+    position: absolute; top: 10px; right: 12px; width: 34px; height: 34px; border-radius: 50%;
+    border: 2px solid var(--ink); background: var(--paper); font-size: 16px; font-weight: 800; cursor: pointer; line-height: 1;
+  }
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+  .field { background: #f7efdd; border: 1.5px solid var(--ink); border-radius: 10px; padding: 8px 12px; }
+  .field.wide { grid-column: 1 / -1; }
+  .field .k { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #6b6257; }
+  .field .v { font-size: 18px; font-weight: 800; margin-top: 1px; }
+  .field .v.small { font-size: 14px; font-weight: 600; line-height: 1.45; word-break: break-word; }
+  .sheet .note { font-size: 12px; color: #6b6257; margin: 12px 0 0; line-height: 1.5; }
+
+  .loading {
+    position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: #f1e8d8;
+    font-weight: 700; font-size: 16px; text-align: center; padding: 20px;
+  }
+  .loading[hidden] { display: none; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div class="topbar">
+  <div class="title">Southern California Cities<small>217 incorporated cities · 8 counties — tap a city</small></div>
+  <div class="search">
+    <input id="q" type="search" placeholder="Search a city… (e.g. Santa Ana)" autocomplete="off" />
+    <div class="results" id="results"></div>
+  </div>
+</div>
+
+<div class="legend">Sales tax rate
+  <div class="bar"></div>
+  <div class="scale"><span>7.25%</span><span>9%</span><span>10.75%</span></div>
+</div>
+
+<section class="sheet" id="sheet" aria-live="polite">
+  <div class="grip"></div>
+  <button class="close" id="close" aria-label="Close">✕</button>
+  <h2 id="f-name">City</h2>
+  <p class="county" id="f-county"></p>
+  <div class="fields" id="fields"></div>
+  <p class="note">Sales tax: CDTFA city rates effective Oct 1, 2026. A few areas have district
+  taxes that vary by address — the CDTFA lookup gives an exact address rate. Population: 2020 Census.
+  ZIP codes shown by centroid. Boundaries: U.S. Census Bureau.</p>
+</section>
+
+<div class="loading" id="loading">Loading the map…</div>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script>
+(function () {
+  var loading = document.getElementById('loading');
+  function fail(msg) { loading.hidden = false; loading.textContent = msg; }
+
+  if (!window.maplibregl) { fail('Map library failed to load — check your connection and reload.'); return; }
+
+  // Field definitions drive the info sheet — add a key here (and in the
+  // dataset properties) to show a new field; nothing else to change.
+  var FIELDS = [
+    { key: 'tax', label: 'Sales tax', format: function (v) { return v == null ? '—' : Number(v).toFixed(3).replace(/0+$/, '').replace(/\.$/, '.0') + '%'; } },
+    { key: 'pop', label: 'Population (2020)', format: function (v) { return v == null ? '—' : Number(v).toLocaleString('en-US'); } },
+    { key: 'zips', label: 'ZIP codes', wide: true, small: true,
+      format: function (v, p) {
+        if (!v) return '—';
+        var list = v.split(' ').join(', ');
+        var extra = (p.zipCount || 0) - v.split(' ').length;
+        return extra > 0 ? list + ' +' + extra + ' more' : list;
+      } },
+  ];
+
+  var map = new maplibregl.Map({
+    container: 'map',
+    style: 'https://tiles.openfreemap.org/styles/positron',
+    center: [-117.85, 33.95],
+    zoom: 7.4,
+    pitch: 45,
+    bearing: -8,
+    maxPitch: 60,
+    minZoom: 6,
+    maxZoom: 15,
+    attributionControl: { compact: true },
+  });
+  window.__cityMap = map;
+  map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+  map.touchZoomRotate.enable();
+  if (map.dragRotate) { /* two-finger rotate stays available on touch */ }
+
+  var cities = null, selectedId = '';
+
+  function setSelected(id) {
+    selectedId = id || '';
+    var f = ['==', ['get', 'id'], selectedId];
+    if (map.getLayer('city-selected')) map.setFilter('city-selected', f);
+    if (map.getLayer('city-selected-line')) map.setFilter('city-selected-line', f);
+  }
+
+  function openSheet(p) {
+    document.getElementById('f-name').textContent = p.name;
+    document.getElementById('f-county').textContent = p.county + ' County';
+    var box = document.getElementById('fields');
+    box.innerHTML = '';
+    FIELDS.forEach(function (fd) {
+      var d = document.createElement('div');
+      d.className = 'field' + (fd.wide ? ' wide' : '');
+      var v = fd.format(p[fd.key], p);
+      d.innerHTML = '<div class="k"></div><div class="v' + (fd.small ? ' small' : '') + '"></div>';
+      d.querySelector('.k').textContent = fd.label;
+      d.querySelector('.v').textContent = v;
+      box.appendChild(d);
+    });
+    document.getElementById('sheet').classList.add('open');
+  }
+  function closeSheet() {
+    document.getElementById('sheet').classList.remove('open');
+    setSelected('');
+  }
+  document.getElementById('close').addEventListener('click', closeSheet);
+
+  function select(props, fly) {
+    setSelected(props.id);
+    openSheet(props);
+    if (fly) map.flyTo({ center: [props.lon, props.lat], zoom: Math.max(map.getZoom(), 10.2), pitch: 45, duration: 900 });
+  }
+
+  map.on('load', function () {
+    fetch('/cities.geojson')
+      .then(function (r) { if (!r.ok) throw new Error('geojson ' + r.status); return r.json(); })
+      .then(function (gj) {
+        cities = gj;
+        var points = { type: 'FeatureCollection', features: gj.features.map(function (f) {
+          return { type: 'Feature', properties: { name: f.properties.name },
+                   geometry: { type: 'Point', coordinates: [f.properties.lon, f.properties.lat] } };
+        }) };
+        map.addSource('cities', { type: 'geojson', data: gj, promoteId: 'id' });
+        map.addSource('city-points', { type: 'geojson', data: points });
+
+        map.addLayer({
+          id: 'city-fill', type: 'fill', source: 'cities',
+          paint: {
+            'fill-color': ['interpolate', ['linear'], ['coalesce', ['get', 'tax'], 7.25],
+              7.25, '#f6e7c8', 8.25, '#eab676', 9.25, '#d97b36', 10.75, '#8a3b12'],
+            'fill-opacity': 0.78,
+          },
+        });
+        map.addLayer({
+          id: 'city-line', type: 'line', source: 'cities',
+          paint: { 'line-color': '#3a3428', 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.7, 11, 2], 'line-opacity': 0.85 },
+        });
+        map.addLayer({
+          id: 'city-selected', type: 'fill', source: 'cities',
+          filter: ['==', ['get', 'id'], ''],
+          paint: { 'fill-color': '#ffb703', 'fill-opacity': 0.45 },
+        });
+        map.addLayer({
+          id: 'city-selected-line', type: 'line', source: 'cities',
+          filter: ['==', ['get', 'id'], ''],
+          paint: { 'line-color': '#111111', 'line-width': 3 },
+        });
+        map.addLayer({
+          id: 'city-labels', type: 'symbol', source: 'city-points', minzoom: 8.6,
+          layout: {
+            'text-field': ['get', 'name'], 'text-size': ['interpolate', ['linear'], ['zoom'], 8.6, 10, 12, 14],
+            'text-font': ['Noto Sans Regular'], 'text-allow-overlap': false,
+          },
+          paint: { 'text-color': '#26221c', 'text-halo-color': '#fffdf8', 'text-halo-width': 1.4 },
+        });
+
+        map.on('click', function (e) {
+          var pad = 7;
+          var hits = map.queryRenderedFeatures(
+            [[e.point.x - pad, e.point.y - pad], [e.point.x + pad, e.point.y + pad]],
+            { layers: ['city-fill'] });
+          if (!hits.length) { closeSheet(); return; }
+          var best = hits[0], bd = Infinity;
+          hits.forEach(function (h) {
+            var p = map.project([h.properties.lon, h.properties.lat]);
+            var d = (p.x - e.point.x) ** 2 + (p.y - e.point.y) ** 2;
+            if (d < bd) { bd = d; best = h; }
+          });
+          select(best.properties, false);
+        });
+        map.on('mouseenter', 'city-fill', function () { map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', 'city-fill', function () { map.getCanvas().style.cursor = ''; });
+
+        loading.hidden = true;
+      })
+      .catch(function (err) { fail('Could not load city data (' + err.message + ').'); });
+  });
+  map.on('error', function (e) {
+    if (!cities) fail('Map tiles failed to load — check your connection and reload.');
+  });
+
+  /* ---------- search ---------- */
+  var q = document.getElementById('q'), results = document.getElementById('results');
+  q.addEventListener('input', function () {
+    var needle = q.value.trim().toLowerCase();
+    results.innerHTML = '';
+    if (!needle || !cities) { results.style.display = 'none'; return; }
+    var matches = cities.features
+      .filter(function (f) { return f.properties.name.toLowerCase().includes(needle); })
+      .sort(function (a, b) {
+        var as = a.properties.name.toLowerCase().startsWith(needle) ? 0 : 1;
+        var bs = b.properties.name.toLowerCase().startsWith(needle) ? 0 : 1;
+        return as - bs || (b.properties.pop || 0) - (a.properties.pop || 0);
+      })
+      .slice(0, 8);
+    if (!matches.length) { results.style.display = 'none'; return; }
+    matches.forEach(function (f) {
+      var b = document.createElement('button');
+      var n = document.createElement('span'); n.textContent = f.properties.name;
+      var c = document.createElement('span'); c.className = 'c'; c.textContent = f.properties.county + ' Co.';
+      b.appendChild(n); b.appendChild(c);
+      b.addEventListener('click', function () {
+        results.style.display = 'none'; q.value = f.properties.name; q.blur();
+        select(f.properties, true);
+      });
+      results.appendChild(b);
+    });
+    results.style.display = 'block';
+  });
+  document.addEventListener('click', function (e) {
+    if (!results.contains(e.target) && e.target !== q) results.style.display = 'none';
+  });
+})();
+</script>
+</body>
+</html>

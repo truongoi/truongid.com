@@ -482,6 +482,7 @@
             ["neofetch", "system specs, but make it personal"],
             ["sites", "my places on the web"],
             ["arcade", "Minh's games room"],
+            ["map", "Southern California city map — borders & sales tax"],
             ["contact", "how to reach me"],
             ["joke", "a developer joke"],
             ["date", "current date & time"],
@@ -511,7 +512,7 @@
            Order matters: the first prefix match wins. */
         var HINTS = [
           "help", "man truong", "about", "whoami", "skills", "neofetch",
-          "sites", "arcade", "contact", "joke", "date", "clear", "exit", "history", "login",
+          "sites", "arcade", "map", "contact", "joke", "date", "clear", "exit", "history", "login",
           "sudo", "hack", "coffee", "vim",
           "rm -rf /", "reboot", "shutdown", "poweroff", "yes",
           "kill -9 1", "killall", "mkfs.ext4 /dev/sda",
@@ -941,6 +942,12 @@
               line("Mind the high scores. Minh holds all of them.", "dim");
               finish();
               setTimeout(function () { location.href = "/arcade/"; }, 1600);
+              return;
+            case "map":
+              line("Opening the SoCal city map…", "bright");
+              line("217 cities, every border — tap one for its sales tax.", "dim");
+              finish();
+              setTimeout(function () { location.href = "/map/"; }, 1600);
               return;
             case "contact":
               line("No public inbox.");
