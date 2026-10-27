@@ -234,6 +234,7 @@
         .window .titlebar:active { cursor: grabbing; }
         .window .dot { cursor: pointer; }
         .app-window .dot { border: 0; padding: 0; }
+        .app-window .dot:disabled { opacity: 0.35; cursor: default; }
 
         .resize-handle {
           position: absolute;
@@ -1430,10 +1431,13 @@
             el.dataset.pw = el.style.width;
             el.dataset.ph = el.style.height;
             el.dataset.maxed = "1";
-            el.style.left = "8px";
-            el.style.top = "38px";
-            el.style.width = (stage.clientWidth - 16) + "px";
-            el.style.height = (stage.clientHeight - 46) + "px";
+            /* Full-bleed: covers the desktop icons, stops above the dock
+               (menu bar strip on top, dock strip at the bottom stay clear). */
+            var dockSpace = (dock.offsetHeight || 48) + 18;
+            el.style.left = "0px";
+            el.style.top = "30px";
+            el.style.width = stage.clientWidth + "px";
+            el.style.height = (stage.clientHeight - 30 - dockSpace) + "px";
           }
         }
 
@@ -1448,7 +1452,11 @@
         }
 
         /* ----- window factory ----- */
-        function makeWin(key, title, bodyEl, w, h, glyph, dockLabel) {
+        /* opts.resizable === false pins the window size: no corner handle
+           and a disabled green dot (used by the Arcade, whose games are
+           laid out for one fixed size). */
+        function makeWin(key, title, bodyEl, w, h, glyph, dockLabel, opts) {
+          opts = opts || {};
           var ex = wins[key];
           if (ex) {
             if (ex.style.display === "none") ex.style.display = "";
@@ -1468,8 +1476,10 @@
           bar.appendChild(cr); bar.appendChild(mn); bar.appendChild(mx); bar.appendChild(tt);
           sec.appendChild(bar);
           sec.appendChild(bodyEl);
-          var rz = document.createElement("div"); rz.className = "resize-handle"; rz.setAttribute("aria-hidden", "true");
-          sec.appendChild(rz);
+          if (opts.resizable !== false) {
+            var rz = document.createElement("div"); rz.className = "resize-handle"; rz.setAttribute("aria-hidden", "true");
+            sec.appendChild(rz);
+          }
           stage.appendChild(sec);
           wins[key] = sec;
 
@@ -1482,11 +1492,16 @@
             sec.style.display = "none";
             markMinimized(key, true);
           });
-          mx.addEventListener("click", function () { toggleMax(sec); });
+          if (opts.resizable === false) {
+            mx.disabled = true;
+            mx.setAttribute("aria-label", "Maximize window (not available for this window)");
+          } else {
+            mx.addEventListener("click", function () { toggleMax(sec); });
+          }
 
           placeCascade(sec, w, h);
           dragify(sec);
-          resizify(sec);
+          if (opts.resizable !== false) resizify(sec);
           dockItem(key, glyph, dockLabel, function () {
             if (sec.style.display === "none") sec.style.display = "";
             focusWin(sec);
@@ -1639,7 +1654,7 @@
           makeWin(key, name, wrap, 580, 430, "📁", name);
         }
 
-        function openApp(key, title, url, glyph) {
+        function openApp(key, title, url, glyph, resizable) {
           var full = "app:" + key;
           if (wins[full]) {
             var ex = wins[full];
@@ -1650,7 +1665,7 @@
           var frame = document.createElement("iframe");
           frame.src = url;
           frame.title = title;
-          makeWin(full, title, frame, 920, 640, glyph, title);
+          makeWin(full, title, frame, 920, 640, glyph, title, { resizable: resizable });
         }
 
         /* ----- terminal window: center it, make it draggable/resizable ----- */
@@ -1709,8 +1724,8 @@
             var target = this.getAttribute("data-open");
             if (target === "term") restoreTerm();
             else if (target.indexOf("folder:") === 0) openFolder(target.slice(7));
-            else if (target === "app:arcade") openApp("arcade", "Minh's Arcade", "/arcade/", "🎮");
-            else if (target === "app:map") openApp("map", "SoCal City Map", "/map/", "🗺️");
+            else if (target === "app:arcade") openApp("arcade", "Minh's Arcade", "/arcade/", "🎮", false);
+            else if (target === "app:map") openApp("map", "SoCal City Map", "/map/", "🗺️", true);
           });
         }
 
