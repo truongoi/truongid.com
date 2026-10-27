@@ -217,6 +217,9 @@
 
         .stage {
           display: block;
+          /* The windows layer sits above the desktop icons (z 5) and
+             below the dock (9000) and menu bar (10000). */
+          z-index: 10;
           background:
             radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.10), transparent 55%),
             linear-gradient(160deg, #6b8570 0%, #43604b 48%, #2e4a37 100%);
@@ -314,6 +317,9 @@
         }
         .dicon .lbl { font-size: 12px; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9); }
         .dicon:active .glyph { background: rgba(240, 168, 64, 0.35); }
+        /* While any window is maximized it covers the whole desktop, so
+           the icons hide until no maximized window remains. */
+        body.has-max .desktop-icons { display: none; }
 
         .dock {
           position: fixed;
@@ -1342,6 +1348,18 @@
           }
           if (mine) mine.classList.remove("minimized");
           void btn;
+          syncMaxedIcons();
+        }
+
+        /* Counts live maximized-and-visible windows and hides the desktop
+           icons while the count is above zero. Checked against live state,
+           not assumed from z-index. */
+        function syncMaxedIcons() {
+          var n = 0;
+          function vis(el) { return el && el.dataset.maxed === "1" && el.style.display !== "none"; }
+          if (vis(termWin)) n++;
+          Object.keys(wins).forEach(function (k) { if (vis(wins[k])) n++; });
+          document.body.classList.toggle("has-max", n > 0);
         }
 
         /* ----- dock ----- */
@@ -1439,6 +1457,7 @@
             el.style.width = stage.clientWidth + "px";
             el.style.height = (stage.clientHeight - 30 - dockSpace) + "px";
           }
+          syncMaxedIcons();
         }
 
         function placeCascade(el, w, h) {
@@ -1487,10 +1506,12 @@
             sec.remove();
             delete wins[key];
             undock(key);
+            syncMaxedIcons();
           });
           mn.addEventListener("click", function () {
             sec.style.display = "none";
             markMinimized(key, true);
+            syncMaxedIcons();
           });
           if (opts.resizable === false) {
             mx.disabled = true;
@@ -1689,8 +1710,8 @@
           var tb = termWin.querySelector(".titlebar");
           if (tb) tb.removeAttribute("aria-hidden");
           var dots = termWin.querySelectorAll(".dot");
-          if (dots[0]) { dots[0].setAttribute("role", "button"); dots[0].setAttribute("aria-label", "Close Terminal"); dots[0].addEventListener("click", function () { termWin.style.display = "none"; markMinimized("term", true); }); }
-          if (dots[1]) { dots[1].setAttribute("role", "button"); dots[1].setAttribute("aria-label", "Minimize Terminal"); dots[1].addEventListener("click", function () { termWin.style.display = "none"; markMinimized("term", true); }); }
+          if (dots[0]) { dots[0].setAttribute("role", "button"); dots[0].setAttribute("aria-label", "Close Terminal"); dots[0].addEventListener("click", function () { termWin.style.display = "none"; markMinimized("term", true); syncMaxedIcons(); }); }
+          if (dots[1]) { dots[1].setAttribute("role", "button"); dots[1].setAttribute("aria-label", "Minimize Terminal"); dots[1].addEventListener("click", function () { termWin.style.display = "none"; markMinimized("term", true); syncMaxedIcons(); }); }
           if (dots[2]) { dots[2].setAttribute("role", "button"); dots[2].setAttribute("aria-label", "Maximize Terminal"); dots[2].addEventListener("click", function () { toggleMax(termWin); }); }
           var rz = document.createElement("div");
           rz.className = "resize-handle";
