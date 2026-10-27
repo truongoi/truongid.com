@@ -217,9 +217,11 @@
 
         .stage {
           display: block;
-          /* The windows layer sits above the desktop icons (z 5) and
-             below the dock (9000) and menu bar (10000). */
-          z-index: 10;
+          /* NOTE: stage must NOT take a z-index. It paints the opaque
+             wallpaper, and a z-index would lift that wallpaper above the
+             desktop icons (z 5) and bury them. With z-index auto, the
+             wallpaper stays behind the icons while the windows (z 20+)
+             still sit above them. */
           background:
             radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.10), transparent 55%),
             linear-gradient(160deg, #6b8570 0%, #43604b 48%, #2e4a37 100%);
