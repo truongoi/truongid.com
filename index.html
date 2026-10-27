@@ -204,11 +204,216 @@
       @media (prefers-reduced-motion: reduce) {
         .cursor-block { animation: none; }
       }
+
+      /* ---------- truongOS desktop: screens wider than 1024px ----------
+         Below this width nothing changes: the page stays the fullscreen
+         terminal it has always been. Above it, the stage becomes a desktop
+         (wallpaper, menu bar, icons, dock) and the terminal becomes one
+         window among others. The terminal's own code is untouched. */
+      .desktop-ui { display: none; }
+
+      @media (min-width: 1025px) {
+        .desktop-ui { display: block; }
+
+        .stage {
+          display: block;
+          background:
+            radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.10), transparent 55%),
+            linear-gradient(160deg, #6b8570 0%, #43604b 48%, #2e4a37 100%);
+        }
+
+        .window {
+          position: absolute;
+          width: 720px;
+          height: 600px;
+          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6), 0 2px 0 rgba(255, 212, 121, 0.05) inset;
+        }
+        .window.inactive { box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5); }
+        .window.inactive .titlebar { opacity: 0.7; }
+        .window .titlebar { cursor: grab; }
+        .window .titlebar:active { cursor: grabbing; }
+        .window .dot { cursor: pointer; }
+        .app-window .dot { border: 0; padding: 0; }
+
+        .resize-handle {
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          width: 20px;
+          height: 20px;
+          cursor: nwse-resize;
+          z-index: 5;
+        }
+        .resize-handle::after {
+          content: "";
+          position: absolute;
+          right: 3px;
+          bottom: 3px;
+          width: 10px;
+          height: 10px;
+          border-right: 2px solid var(--amber-dim);
+          border-bottom: 2px solid var(--amber-dim);
+          opacity: 0.6;
+        }
+
+        .menubar {
+          position: fixed;
+          top: 0; left: 0; right: 0;
+          height: 30px;
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 14px;
+          background: rgba(18, 14, 10, 0.55);
+          -webkit-backdrop-filter: blur(14px);
+          backdrop-filter: blur(14px);
+          color: #f5ead2;
+          font-size: 13px;
+          user-select: none;
+          -webkit-user-select: none;
+        }
+        .menubar .mleft, .menubar .mright { display: flex; align-items: center; gap: 14px; }
+        .menubar .tlogo { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
+        .menubar .appname { font-weight: 700; }
+        .menubar .clock { font-variant-numeric: tabular-nums; }
+        .menubar svg { display: block; }
+
+        .desktop-icons {
+          position: fixed;
+          top: 46px;
+          left: 16px;
+          z-index: 5;
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+        .dicon {
+          width: 78px;
+          background: none;
+          border: 0;
+          padding: 0;
+          color: #fff;
+          font: inherit;
+          cursor: pointer;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+        }
+        .dicon .glyph {
+          width: 54px;
+          height: 46px;
+          border-radius: 9px;
+          background: rgba(18, 26, 20, 0.55);
+          border: 1px solid rgba(255, 255, 255, 0.28);
+          display: grid;
+          place-items: center;
+          font-size: 23px;
+        }
+        .dicon .lbl { font-size: 12px; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9); }
+        .dicon:active .glyph { background: rgba(240, 168, 64, 0.35); }
+
+        .dock {
+          position: fixed;
+          bottom: 10px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 9000;
+          display: flex;
+          gap: 6px;
+          padding: 6px 10px;
+          background: rgba(18, 14, 10, 0.55);
+          -webkit-backdrop-filter: blur(14px);
+          backdrop-filter: blur(14px);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          border-radius: 16px;
+        }
+        .dock:empty { display: none; }
+        .dock button {
+          background: none;
+          border: 0;
+          padding: 5px 7px;
+          border-radius: 9px;
+          font-size: 21px;
+          cursor: pointer;
+          line-height: 1;
+        }
+        .dock button:hover { background: rgba(255, 255, 255, 0.14); }
+        .dock button.minimized { opacity: 0.5; }
+
+        .app-toolbar {
+          flex: 0 0 auto;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 12px;
+          background: var(--bar);
+          border-bottom: 1px solid var(--win-edge);
+        }
+        .app-toolbar .navbtn {
+          width: 26px; height: 26px;
+          border-radius: 6px;
+          border: 1px solid var(--win-edge);
+          background: transparent;
+          color: var(--amber);
+          font-size: 16px;
+          line-height: 1;
+          cursor: pointer;
+        }
+        .app-toolbar .navbtn:disabled { opacity: 0.35; cursor: default; }
+        .app-toolbar .app-path { font-size: 12.5px; color: var(--amber-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .app-body { flex: 1 1 auto; display: flex; min-height: 0; }
+        .app-sidebar {
+          flex: 0 0 172px;
+          background: var(--bar);
+          border-right: 1px solid var(--win-edge);
+          padding: 10px 8px;
+          overflow-y: auto;
+        }
+        .app-sidebar button {
+          display: block;
+          width: 100%;
+          text-align: left;
+          background: none;
+          border: 0;
+          padding: 7px 10px;
+          border-radius: 6px;
+          color: var(--amber-dim);
+          font: inherit;
+          font-size: 13px;
+          cursor: pointer;
+        }
+        .app-sidebar button.active { background: rgba(240, 168, 64, 0.16); color: var(--amber-bright); }
+        .app-files { flex: 1 1 auto; overflow-y: auto; padding: 10px; }
+        .file-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 8px 10px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 13.5px;
+        }
+        .file-row:hover { background: rgba(240, 168, 64, 0.09); }
+        .file-row .fglyph { font-size: 17px; }
+        .note-body {
+          flex: 1 1 auto;
+          overflow-y: auto;
+          padding: 18px 22px;
+          white-space: pre-wrap;
+          word-break: break-word;
+          line-height: 1.7;
+          font-size: 14px;
+          color: var(--amber-bright);
+        }
+        .app-window iframe { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: #fff; }
+      }
     </style>
   </head>
   <body>
     <main class="stage" id="stage">
-      <section class="window" aria-label="Interactive terminal — Truong Nguyen professional ID">
+      <section class="window" id="termWindow" aria-label="Interactive terminal — Truong Nguyen professional ID">
         <div class="titlebar" aria-hidden="true">
           <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
           <span class="tt">truong@id: ~ — zsh</span>
@@ -220,6 +425,28 @@
         </div>
       </section>
     </main>
+    <div class="desktop-ui" id="desktopUi">
+      <header class="menubar" aria-label="truongOS menu bar">
+        <div class="mleft">
+          <span class="tlogo" aria-label="truongOS">T</span>
+          <span class="appname">truongOS</span>
+        </div>
+        <div class="mright">
+          <svg width="18" height="13" viewBox="0 0 18 13" fill="none" aria-label="Wi-Fi" role="img"><circle cx="9" cy="11" r="1.4" fill="currentColor" /><path d="M6.4 8.3a3.8 3.8 0 0 1 5.2 0M3.8 5.7a7.4 7.4 0 0 1 10.4 0M1.2 3.1a11 11 0 0 1 15.6 0" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" /></svg>
+          <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-label="Sound" role="img"><path d="M1 5v4h3l4 3.5v-11L4 5H1z" fill="currentColor" /><path d="M11 3.5a4.5 4.5 0 0 1 0 7M13.5 1.5a8 8 0 0 1 0 11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" /></svg>
+          <span class="clock" id="menuClock"></span>
+        </div>
+      </header>
+      <nav class="desktop-icons" aria-label="Desktop">
+        <button class="dicon" data-open="term"><span class="glyph">💻</span><span class="lbl">Terminal</span></button>
+        <button class="dicon" data-open="folder:About"><span class="glyph">📁</span><span class="lbl">About</span></button>
+        <button class="dicon" data-open="folder:Skills"><span class="glyph">📁</span><span class="lbl">Skills</span></button>
+        <button class="dicon" data-open="folder:Sites"><span class="glyph">📁</span><span class="lbl">Sites</span></button>
+        <button class="dicon" data-open="app:arcade"><span class="glyph">🎮</span><span class="lbl">Arcade</span></button>
+        <button class="dicon" data-open="app:map"><span class="glyph">🗺️</span><span class="lbl">Map</span></button>
+      </nav>
+      <div class="dock" id="dock" aria-label="Dock"></div>
+    </div>
     <script>
       (function () {
         "use strict";
@@ -1077,6 +1304,446 @@
           .catch(function () {})
           .then(start);
         setTimeout(start, 700);
+      })();
+    </script>
+    <script>
+      /* ---------- truongOS desktop window manager (min-width: 1025px) ----------
+         Only runs its layout when the viewport is wider than 1024px. On
+         narrower screens this script does nothing and the page stays the
+         fullscreen terminal. The terminal's own script above is untouched:
+         the window manager only moves its <section> around, and the
+         terminal keeps working exactly as on mobile. */
+      (function () {
+        "use strict";
+
+        var mq = window.matchMedia("(min-width: 1025px)");
+        var stage = document.getElementById("stage");
+        var termWin = document.getElementById("termWindow");
+        var dock = document.getElementById("dock");
+        if (!stage || !termWin || !dock) return;
+
+        function isDesktop() { return mq.matches; }
+
+        var zTop = 20;
+        var wins = {}; /* key -> window element (folder / note / app windows) */
+        var termMoved = false;
+
+        /* ----- focus / z-order ----- */
+        function focusWin(el) {
+          zTop += 1;
+          el.style.zIndex = zTop;
+          var all = stage.querySelectorAll(".window");
+          for (var i = 0; i < all.length; i++) all[i].classList.toggle("inactive", all[i] !== el);
+          var btn = dock.querySelector('[data-dock]');
+          var mine = null;
+          for (var j = 0; j < dock.children.length; j++) {
+            if (dock.children[j].getAttribute("data-win") === el.getAttribute("data-win")) mine = dock.children[j];
+          }
+          if (mine) mine.classList.remove("minimized");
+          void btn;
+        }
+
+        /* ----- dock ----- */
+        function dockItem(key, glyph, label, onActivate) {
+          var b = dock.querySelector('[data-dock="' + key + '"]');
+          if (b) return b;
+          b = document.createElement("button");
+          b.setAttribute("data-dock", key);
+          b.setAttribute("data-win", key);
+          b.setAttribute("aria-label", label);
+          b.textContent = glyph;
+          b.addEventListener("click", onActivate);
+          dock.appendChild(b);
+          return b;
+        }
+        function undock(key) {
+          var b = dock.querySelector('[data-dock="' + key + '"]');
+          if (b) b.remove();
+        }
+        function markMinimized(key, on) {
+          var b = dock.querySelector('[data-dock="' + key + '"]');
+          if (b) b.classList.toggle("minimized", !!on);
+        }
+
+        /* ----- drag / resize / maximize ----- */
+        function dragify(el) {
+          var bar = el.querySelector(".titlebar");
+          if (!bar) return;
+          bar.addEventListener("pointerdown", function (ev) {
+            if (!isDesktop() || ev.target.closest("button, .dot")) return;
+            focusWin(el);
+            if (el.dataset.maxed === "1") return;
+            var sx = ev.clientX, sy = ev.clientY;
+            var ox = el.offsetLeft, oy = el.offsetTop;
+            document.body.style.userSelect = "none";
+            function move(e2) {
+              el.style.left = Math.max(-el.offsetWidth + 120, Math.min(stage.clientWidth - 60, ox + e2.clientX - sx)) + "px";
+              el.style.top = Math.max(30, Math.min(stage.clientHeight - 30, oy + e2.clientY - sy)) + "px";
+              if (el === termWin) termMoved = true;
+            }
+            function up() {
+              document.body.style.userSelect = "";
+              window.removeEventListener("pointermove", move);
+              window.removeEventListener("pointerup", up);
+            }
+            window.addEventListener("pointermove", move);
+            window.addEventListener("pointerup", up);
+          });
+          el.addEventListener("pointerdown", function () { if (isDesktop()) focusWin(el); });
+        }
+
+        function resizify(el) {
+          var h = el.querySelector(".resize-handle");
+          if (!h) return;
+          h.addEventListener("pointerdown", function (ev) {
+            if (!isDesktop()) return;
+            ev.preventDefault();
+            ev.stopPropagation();
+            focusWin(el);
+            if (el.dataset.maxed === "1") return;
+            var sx = ev.clientX, sy = ev.clientY, ow = el.offsetWidth, oh = el.offsetHeight;
+            document.body.style.userSelect = "none";
+            function move(e2) {
+              el.style.width = Math.max(360, Math.min(stage.clientWidth - el.offsetLeft - 8, ow + e2.clientX - sx)) + "px";
+              el.style.height = Math.max(260, Math.min(stage.clientHeight - el.offsetTop - 8, oh + e2.clientY - sy)) + "px";
+            }
+            function up() {
+              document.body.style.userSelect = "";
+              window.removeEventListener("pointermove", move);
+              window.removeEventListener("pointerup", up);
+            }
+            window.addEventListener("pointermove", move);
+            window.addEventListener("pointerup", up);
+          });
+        }
+
+        function toggleMax(el) {
+          if (el.dataset.maxed === "1") {
+            el.dataset.maxed = "";
+            el.style.left = el.dataset.pl;
+            el.style.top = el.dataset.pt;
+            el.style.width = el.dataset.pw;
+            el.style.height = el.dataset.ph;
+          } else {
+            el.dataset.pl = el.style.left;
+            el.dataset.pt = el.style.top;
+            el.dataset.pw = el.style.width;
+            el.dataset.ph = el.style.height;
+            el.dataset.maxed = "1";
+            el.style.left = "8px";
+            el.style.top = "38px";
+            el.style.width = (stage.clientWidth - 16) + "px";
+            el.style.height = (stage.clientHeight - 46) + "px";
+          }
+        }
+
+        function placeCascade(el, w, h) {
+          var n = Object.keys(wins).length;
+          var cw = Math.min(w, stage.clientWidth - 16);
+          var ch = Math.min(h, stage.clientHeight - 46);
+          el.style.width = cw + "px";
+          el.style.height = ch + "px";
+          el.style.left = Math.max(8, Math.min(stage.clientWidth - cw - 8, (stage.clientWidth - cw) / 2 + (n % 5) * 36 - 72)) + "px";
+          el.style.top = Math.max(38, Math.min(stage.clientHeight - ch - 8, 30 + (stage.clientHeight - 30 - ch) / 2 + (n % 5) * 28 - 56)) + "px";
+        }
+
+        /* ----- window factory ----- */
+        function makeWin(key, title, bodyEl, w, h, glyph, dockLabel) {
+          var ex = wins[key];
+          if (ex) {
+            if (ex.style.display === "none") ex.style.display = "";
+            focusWin(ex);
+            return ex;
+          }
+          var sec = document.createElement("section");
+          sec.className = "window app-window";
+          sec.setAttribute("data-win", key);
+          sec.setAttribute("aria-label", title);
+          var bar = document.createElement("div");
+          bar.className = "titlebar";
+          var cr = document.createElement("button"); cr.className = "dot r"; cr.setAttribute("aria-label", "Close window");
+          var mn = document.createElement("button"); mn.className = "dot y"; mn.setAttribute("aria-label", "Minimize window");
+          var mx = document.createElement("button"); mx.className = "dot g"; mx.setAttribute("aria-label", "Maximize window");
+          var tt = document.createElement("span"); tt.className = "tt"; tt.textContent = title;
+          bar.appendChild(cr); bar.appendChild(mn); bar.appendChild(mx); bar.appendChild(tt);
+          sec.appendChild(bar);
+          sec.appendChild(bodyEl);
+          var rz = document.createElement("div"); rz.className = "resize-handle"; rz.setAttribute("aria-hidden", "true");
+          sec.appendChild(rz);
+          stage.appendChild(sec);
+          wins[key] = sec;
+
+          cr.addEventListener("click", function () {
+            sec.remove();
+            delete wins[key];
+            undock(key);
+          });
+          mn.addEventListener("click", function () {
+            sec.style.display = "none";
+            markMinimized(key, true);
+          });
+          mx.addEventListener("click", function () { toggleMax(sec); });
+
+          placeCascade(sec, w, h);
+          dragify(sec);
+          resizify(sec);
+          dockItem(key, glyph, dockLabel, function () {
+            if (sec.style.display === "none") sec.style.display = "";
+            focusWin(sec);
+          });
+          focusWin(sec);
+          return sec;
+        }
+
+        /* ----- the "filesystem": folders + documents -----
+           Document text is rendered from id-config.json — the same source
+           the terminal commands read — so the note view and the terminal
+           can never drift apart. */
+        var FOLDERS = ["About", "Skills", "Sites"];
+        var FILES = {
+          "About": [
+            { name: "profile.txt", type: "doc", doc: "profile" },
+            { name: "contact.txt", type: "doc", doc: "contact" }
+          ],
+          "Skills": [
+            { name: "skills.txt", type: "doc", doc: "skills" }
+          ],
+          "Sites": [
+            { name: "sites.txt", type: "doc", doc: "sites" }
+          ]
+        };
+        var GLOSSES = {
+          "interfaces": "clean, usable interfaces for web products",
+          "systems": "practical systems that make complicated work feel simple",
+          "operations": "dependable day-to-day running of things"
+        };
+
+        var cfgPromise = null;
+        function getCfg() {
+          if (!cfgPromise) {
+            cfgPromise = fetch("id-config.json", { cache: "no-store" })
+              .then(function (r) { return r.json(); })
+              .catch(function () { return {}; });
+          }
+          return cfgPromise;
+        }
+
+        function docText(kind, cfg) {
+          var name = (((cfg.firstName || "Truong") + " " + (cfg.lastName || "Nguyen.")).trim());
+          var role = cfg.role || "Front-end engineer";
+          var stmt = cfg.statement || "";
+          var code = (cfg.eyebrow || "Professional identity") + " · " + (cfg.portraitCode || "") + " · " + (cfg.serial || "");
+          if (kind === "profile") return name + " — " + role + "\n" + stmt + "\n" + code;
+          if (kind === "contact") return "No public inbox.\nSee sites.txt for the places I keep up.";
+          if (kind === "skills") {
+            return (cfg.specialties || []).map(function (s) {
+              var flag = "--" + String(s).toLowerCase().replace(/\s+/g, "-");
+              var g = GLOSSES[String(s).toLowerCase()] || "";
+              return flag + "  " + s + (g ? " — " + g : "");
+            }).join("\n");
+          }
+          if (kind === "sites") {
+            var lines = ["Places I keep up:", "truongnpt.com — blog, writing & projects", "guihangmy.com — Dino Gửi Hàng Mỹ, proxy shipping US → VN"];
+            (cfg.links || []).forEach(function (l) {
+              if (l && l.label) lines.push(l.label + (l.href ? " — " + l.href : ""));
+            });
+            return lines.join("\n");
+          }
+          return "";
+        }
+
+        function openDoc(kind, filename) {
+          var key = "doc:" + kind;
+          if (wins[key]) {
+            var ex = wins[key];
+            if (ex.style.display === "none") ex.style.display = "";
+            focusWin(ex);
+            return;
+          }
+          getCfg().then(function (cfg) {
+            var body = document.createElement("div");
+            body.className = "note-body";
+            body.textContent = docText(kind, cfg);
+            makeWin(key, filename, body, 520, 420, "📄", filename);
+          });
+        }
+
+        function openFolder(name) {
+          var key = "folder:" + name;
+          if (wins[key]) {
+            var ex = wins[key];
+            if (ex.style.display === "none") ex.style.display = "";
+            focusWin(ex);
+            return;
+          }
+          var hist = [name], hi = 0;
+          var body = document.createElement("div");
+          body.className = "app-body";
+          var side = document.createElement("aside");
+          side.className = "app-sidebar";
+          var filesEl = document.createElement("div");
+          filesEl.className = "app-files";
+          body.appendChild(side);
+          body.appendChild(filesEl);
+
+          var wrap = document.createElement("div");
+          wrap.style.display = "flex";
+          wrap.style.flexDirection = "column";
+          wrap.style.flex = "1 1 auto";
+          wrap.style.minHeight = "0";
+          var toolbar = document.createElement("div");
+          toolbar.className = "app-toolbar";
+          var back = document.createElement("button"); back.className = "navbtn"; back.setAttribute("aria-label", "Back"); back.textContent = "‹";
+          var fwd = document.createElement("button"); fwd.className = "navbtn"; fwd.setAttribute("aria-label", "Forward"); fwd.textContent = "›";
+          var pathEl = document.createElement("span"); pathEl.className = "app-path";
+          toolbar.appendChild(back); toolbar.appendChild(fwd); toolbar.appendChild(pathEl);
+          wrap.appendChild(toolbar);
+          wrap.appendChild(body);
+
+          var sideBtns = {};
+          FOLDERS.forEach(function (f) {
+            var b = document.createElement("button");
+            b.textContent = f;
+            b.addEventListener("click", function () {
+              if (hist[hi] === f) return;
+              hist = hist.slice(0, hi + 1);
+              hist.push(f);
+              hi++;
+              render();
+            });
+            side.appendChild(b);
+            sideBtns[f] = b;
+          });
+          back.addEventListener("click", function () { if (hi > 0) { hi--; render(); } });
+          fwd.addEventListener("click", function () { if (hi < hist.length - 1) { hi++; render(); } });
+
+          function render() {
+            var cur = hist[hi];
+            pathEl.textContent = "truongOS / " + cur;
+            back.disabled = hi === 0;
+            fwd.disabled = hi >= hist.length - 1;
+            FOLDERS.forEach(function (f) { sideBtns[f].classList.toggle("active", f === cur); });
+            filesEl.textContent = "";
+            (FILES[cur] || []).forEach(function (f) {
+              var row = document.createElement("div");
+              row.className = "file-row";
+              var g = document.createElement("span"); g.className = "fglyph"; g.textContent = "📄";
+              var n = document.createElement("span"); n.textContent = f.name;
+              row.appendChild(g);
+              row.appendChild(n);
+              row.addEventListener("click", function () { openDoc(f.doc, f.name); });
+              filesEl.appendChild(row);
+            });
+          }
+          render();
+          makeWin(key, name, wrap, 580, 430, "📁", name);
+        }
+
+        function openApp(key, title, url, glyph) {
+          var full = "app:" + key;
+          if (wins[full]) {
+            var ex = wins[full];
+            if (ex.style.display === "none") ex.style.display = "";
+            focusWin(ex);
+            return;
+          }
+          var frame = document.createElement("iframe");
+          frame.src = url;
+          frame.title = title;
+          makeWin(full, title, frame, 920, 640, glyph, title);
+        }
+
+        /* ----- terminal window: center it, make it draggable/resizable ----- */
+        function centerTerm() {
+          if (termMoved) return;
+          var w = Math.min(720, stage.clientWidth - 16);
+          var h = Math.min(600, stage.clientHeight - 46);
+          termWin.style.width = w + "px";
+          termWin.style.height = h + "px";
+          termWin.style.left = Math.max(8, (stage.clientWidth - w) / 2) + "px";
+          termWin.style.top = Math.max(38, 30 + (stage.clientHeight - 30 - h) / 2) + "px";
+        }
+
+        function restoreTerm() {
+          if (termWin.style.display === "none") termWin.style.display = "";
+          focusWin(termWin);
+        }
+
+        function initDesktop() {
+          termWin.setAttribute("data-win", "term");
+          var tb = termWin.querySelector(".titlebar");
+          if (tb) tb.removeAttribute("aria-hidden");
+          var dots = termWin.querySelectorAll(".dot");
+          if (dots[0]) { dots[0].setAttribute("role", "button"); dots[0].setAttribute("aria-label", "Close Terminal"); dots[0].addEventListener("click", function () { termWin.style.display = "none"; markMinimized("term", true); }); }
+          if (dots[1]) { dots[1].setAttribute("role", "button"); dots[1].setAttribute("aria-label", "Minimize Terminal"); dots[1].addEventListener("click", function () { termWin.style.display = "none"; markMinimized("term", true); }); }
+          if (dots[2]) { dots[2].setAttribute("role", "button"); dots[2].setAttribute("aria-label", "Maximize Terminal"); dots[2].addEventListener("click", function () { toggleMax(termWin); }); }
+          var rz = document.createElement("div");
+          rz.className = "resize-handle";
+          rz.setAttribute("aria-hidden", "true");
+          termWin.appendChild(rz);
+          dragify(termWin);
+          resizify(termWin);
+          centerTerm();
+          dockItem("term", "💻", "Terminal", restoreTerm);
+          focusWin(termWin);
+        }
+
+        function teardownDesktop() {
+          /* Crossing back below 1024px: park every desktop window and let
+             the terminal resume its centered fullscreen layout. */
+          Object.keys(wins).forEach(function (k) { wins[k].style.display = "none"; });
+          termWin.style.left = "";
+          termWin.style.top = "";
+          termWin.style.width = "";
+          termWin.style.height = "";
+          termWin.style.zIndex = "";
+          termWin.style.display = "";
+          termWin.classList.remove("inactive");
+        }
+
+        /* ----- desktop icons ----- */
+        var icons = document.querySelectorAll(".dicon");
+        for (var i = 0; i < icons.length; i++) {
+          icons[i].addEventListener("click", function () {
+            if (!isDesktop()) return;
+            var target = this.getAttribute("data-open");
+            if (target === "term") restoreTerm();
+            else if (target.indexOf("folder:") === 0) openFolder(target.slice(7));
+            else if (target === "app:arcade") openApp("arcade", "Minh's Arcade", "/arcade/", "🎮");
+            else if (target === "app:map") openApp("map", "SoCal City Map", "/map/", "🗺️");
+          });
+        }
+
+        /* ----- menu bar clock ----- */
+        var DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        var MONS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        function tickClock() {
+          var el = document.getElementById("menuClock");
+          if (!el) return;
+          var d = new Date();
+          var h = d.getHours(), ap = h >= 12 ? "PM" : "AM";
+          h = h % 12 || 12;
+          var mm = String(d.getMinutes());
+          if (mm.length < 2) mm = "0" + mm;
+          el.textContent = DAYS[d.getDay()] + " " + MONS[d.getMonth()] + " " + d.getDate() + "  " + h + ":" + mm + " " + ap;
+        }
+        tickClock();
+        setInterval(tickClock, 30000);
+
+        /* ----- mode switching ----- */
+        function onModeChange() {
+          if (isDesktop()) {
+            Object.keys(wins).forEach(function (k) { if (wins[k].dataset.wasHidden !== "1") wins[k].style.display = ""; });
+            centerTerm();
+            focusWin(termWin);
+          } else {
+            teardownDesktop();
+          }
+        }
+        if (mq.addEventListener) mq.addEventListener("change", onModeChange);
+        else if (mq.addListener) mq.addListener(onModeChange);
+
+        if (isDesktop()) initDesktop();
       })();
     </script>
   </body>
