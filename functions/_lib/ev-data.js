@@ -7,10 +7,10 @@
  * startPct/endPct are null where the log does not record battery percentages
  * (all October sessions log charger times instead; 2026-09-28 records neither).
  * Regenerate this module whenever a new session is reported.
- * Latest: session 16 (2026-10-25, 54.10 kWh metered). */
+ * Latest: session 17 (2026-10-30, 60.70 kWh metered). */
 
 export const EV_DATA = {
-  updatedAt: "2026-10-25",
+  updatedAt: "2026-10-30",
   ratePerKwh: 0.24,
   currency: "USD",
   dashboardUrl: "https://truongid.com/ev-t8k2x7m4q9/",
@@ -30,12 +30,13 @@ export const EV_DATA = {
     { date: "2026-10-18", startPct: null, endPct: null, kwh: 47.80, cost: 11.47 },
     { date: "2026-10-19", startPct: null, endPct: null, kwh: 27.90, cost: 6.70 },
     { date: "2026-10-21", startPct: null, endPct: null, kwh: 56.90, cost: 13.66 },
-    { date: "2026-10-25", startPct: null, endPct: null, kwh: 54.10, cost: 12.98 }
+    { date: "2026-10-25", startPct: null, endPct: null, kwh: 54.10, cost: 12.98 },
+    { date: "2026-10-30", startPct: null, endPct: null, kwh: 60.70, cost: 14.57 }
   ],
   totals: {
     september: { kwh: 165.20, cost: 39.65, sessions: 4 },
-    october: { kwh: 509.30, cost: 122.25, sessions: 12 },
-    allTime: { kwh: 674.50, cost: 161.90, sessions: 16 }
+    october: { kwh: 570.00, cost: 136.82, sessions: 13 },
+    allTime: { kwh: 735.20, cost: 176.47, sessions: 17 }
   },
-  currentWeek: { isoWeek: "2026-W43", kwh: 138.90, cost: 33.34, sessions: 3 }
+  currentWeek: { isoWeek: "2026-W44", kwh: 60.70, cost: 14.57, sessions: 1 }
 };
