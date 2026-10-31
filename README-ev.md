@@ -60,6 +60,12 @@ whenever a new session is reported:
 
 Edit both, push, and the terminal printout and Mom's page stay in sync.
 
+3. Bill periods: the dashboard calculator's `PERIODS` array (newest first)
+   holds saved SCE bill periods — start, end, total, household kWh,
+   headcount. When a new bill arrives, add its period to the array on the
+   next push; the newest period is selected and calculated on page load.
+   Current list: 16/09–14/10/2026, $393.76, 1,508 kWh, 4 people.
+
 ## Security model (3 lines)
 
 - The password exists only as a Pages env secret and is verified on the

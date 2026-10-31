@@ -70,6 +70,11 @@
       .calc-grid > div { min-width: 0; }
       .calc label { display: block; font-size: 16px; color: #b3400f; margin-bottom: 4px; }
       .calc label .opt { font-size: 13px; }
+      .calc-period { margin-bottom: 8px; }
+      .calc-period select {
+        width: 100%; height: 50px; font: inherit; font-size: 18px; padding: 10px 34px 10px 12px;
+        border: 1px solid #1565a8; border-radius: 2px; background: #ffffff; color: #222222;
+      }
       .calc input {
         width: 100%; min-width: 0; height: 50px; font: inherit; font-size: 18px; padding: 10px 12px;
         border: 1px solid #1565a8; border-radius: 2px; background: #ffffff; color: #222222;
@@ -131,6 +136,10 @@
 
       <h2>Tính theo kỳ hóa đơn</h2>
       <div class="calc">
+        <div class="calc-period">
+          <label for="c-period">Kỳ hóa đơn đã lưu</label>
+          <select id="c-period"></select>
+        </div>
         <div class="calc-grid">
           <div>
             <label for="c-from">Từ ngày</label>
@@ -221,7 +230,23 @@
         { d: "2026-10-30", kwh: 60.70, cost: 14.57 }
       ];
       function money(n) { return "$" + (Math.round(n * 100) / 100).toFixed(2); }
-      document.getElementById("c-go").addEventListener("click", function () {
+      /* Saved SCE bill periods, newest first. Baked in by hand: when a new
+         bill arrives, its period joins this list on the next push. */
+      var PERIODS = [
+        { start: "2026-09-16", end: "2026-10-14", total: 393.76, kwh: 1508, heads: 4 }
+      ];
+      function fmtRange(p) {
+        var s = p.start.split("-"), e = p.end.split("-");
+        return s[2] + "/" + s[1] + " – " + e[2] + "/" + e[1] + "/" + e[0];
+      }
+      function applyPeriod(i) {
+        var p = PERIODS[i];
+        document.getElementById("c-from").value = p.start;
+        document.getElementById("c-to").value = p.end;
+        document.getElementById("c-total").value = p.total;
+        document.getElementById("c-heads").value = p.heads;
+      }
+      function calculate() {
         var from = document.getElementById("c-from").value;
         var to = document.getElementById("c-to").value;
         var total = parseFloat(document.getElementById("c-total").value);
@@ -250,7 +275,18 @@
         if (rest < 0) html += '<p class="calc-err">Số tiền còn lại bị âm — kiểm tra lại kỳ ngày hoặc tổng tiền điện.</p>';
         if (heads > 0) html += "<p>Chia cho " + heads + " người: <strong>" + money(rest / heads) + "</strong> mỗi người</p>";
         out.innerHTML = html;
+      }
+      var periodSel = document.getElementById("c-period");
+      PERIODS.forEach(function (p, i) {
+        var o = document.createElement("option");
+        o.value = i;
+        o.textContent = fmtRange(p) + " · " + money(p.total);
+        periodSel.appendChild(o);
       });
+      periodSel.addEventListener("change", function () { applyPeriod(periodSel.value); calculate(); });
+      document.getElementById("c-go").addEventListener("click", calculate);
+      applyPeriod(0);
+      calculate();
     </script>
   </body>
 </html>
