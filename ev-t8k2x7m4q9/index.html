@@ -11,63 +11,75 @@
       * { box-sizing: border-box; }
       body {
         margin: 0;
-        background: #f6f3ec;
-        color: #22201c;
+        background: #ffffff;
+        color: #111111;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         font-size: 19px;
-        line-height: 1.5;
+        line-height: 1.4;
       }
-      .wrap { max-width: 660px; margin: 0 auto; padding: 22px 16px 40px; }
-      header { text-align: center; margin-bottom: 20px; }
-      header .icon { font-size: 44px; line-height: 1; }
-      h1 { font-size: 30px; margin: 8px 0 2px; }
-      .sub { color: #6b665c; font-size: 16px; margin: 0; }
-      .meta { color: #6b665c; font-size: 16px; margin-top: 8px; }
-      .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+      .wrap { max-width: 660px; margin: 0 auto; padding: 14px 16px 20px; }
+      header { text-align: center; margin-bottom: 10px; }
+      header .icon { font-size: 36px; line-height: 1; }
+      h1 { font-size: 30px; margin: 4px 0 2px; }
+      .sub { color: #444444; font-size: 16px; margin: 0; }
+      .meta { color: #444444; font-size: 16px; margin-top: 4px; }
+      .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
       .card {
         background: #ffffff;
-        border: 1px solid #e5dfd2;
-        border-radius: 14px;
-        padding: 14px 16px;
+        border: 1px solid #555555;
+        border-radius: 12px;
+        padding: 10px 14px;
       }
-      .card.wide { grid-column: 1 / -1; background: #eef7ee; border-color: #cfe5cf; }
-      .card .label { font-size: 16px; color: #6b665c; margin: 0 0 4px; }
+      .card.alltime { grid-column: 1 / -1; padding: 8px 12px; }
+      .card.alltime .label { font-size: 14px; }
+      .card.alltime .label .en { font-size: 12px; }
+      .card.alltime .big { font-size: 19px; }
+      .card.alltime .detail { font-size: 14px; }
+      .card.hero { grid-column: 1 / -1; background: #14532d; border: 2px solid #14532d; padding: 16px; }
+      .card.hero .label { color: #d4e8d4; }
+      .card.hero .label .en { color: #d4e8d4; }
+      .card.hero .big { font-size: 36px; color: #ffffff; }
+      .card.hero .detail { color: #e5e5e5; font-size: 17px; }
+      .card .label { font-size: 16px; color: #444444; margin: 0 0 4px; }
       .card .label .en { font-size: 13px; }
       .card .big { font-size: 27px; font-weight: 700; margin: 0; }
-      .card .detail { font-size: 16px; color: #45423c; margin: 2px 0 0; }
-      h2 { font-size: 23px; margin: 26px 0 4px; }
-      h2 .en { font-size: 15px; color: #6b665c; font-weight: 400; }
+      .card .detail { font-size: 16px; color: #333333; margin: 2px 0 0; }
+      h2 { font-size: 23px; margin: 14px 0 4px; }
+      h2 .en { font-size: 15px; color: #444444; font-weight: 400; }
       table {
         width: 100%;
         border-collapse: collapse;
         background: #ffffff;
-        border: 1px solid #e5dfd2;
-        border-radius: 14px;
+        border: 2px solid #111111;
+        border-radius: 12px;
         overflow: hidden;
         font-size: 18px;
       }
-      th, td { padding: 10px 12px; text-align: right; }
+      th, td { padding: 8px 10px; text-align: right; }
       th:first-child, td:first-child { text-align: left; }
-      th { background: #faf8f2; color: #6b665c; font-size: 15px; font-weight: 600; }
-      tbody tr + tr td { border-top: 1px solid #f0ebdf; }
+      th { background: #111111; color: #ffffff; font-size: 15px; font-weight: 700; border-bottom: 2px solid #111111; }
+      tbody tr + tr td { border-top: 1px solid #888888; }
       tr.week td {
-        background: #eef7ee;
-        color: #2e5339;
+        background: #14532d;
+        color: #ffffff;
         font-weight: 700;
         font-size: 16px;
         text-align: left;
-        border-top: 2px solid #cfe5cf !important;
+        padding: 10px;
       }
-      tr.week .en { font-size: 13px; font-weight: 400; color: #6b8f71; }
-      tr.sub td { background: #faf8f2; font-weight: 600; }
-      .calc { background: #ffffff; border: 1px solid #e5dfd2; border-radius: 14px; padding: 16px; }
-      .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      /* Gap between week blocks: a white band above every week header
+         except the first, which sits under the table's own top border. */
+      tbody tr.week:not(:first-child) td { border-top: 14px solid #ffffff; }
+      tr.week .en { font-size: 13px; font-weight: 400; color: #d4e8d4; }
+      tr.sub td { background: #e8e8e8; font-weight: 700; border-top: 2px solid #111111; }
+      .calc { background: #ffffff; border: 1px solid #555555; border-radius: 12px; padding: 12px; }
+      .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
       .calc-grid > div { min-width: 0; }
-      .calc label { display: block; font-size: 16px; color: #6b665c; margin-bottom: 4px; }
+      .calc label { display: block; font-size: 16px; color: #444444; margin-bottom: 4px; }
       .calc label .opt { font-size: 13px; }
       .calc input {
         width: 100%; min-width: 0; height: 50px; font: inherit; font-size: 18px; padding: 10px 12px;
-        border: 1px solid #ddd6c4; border-radius: 10px; background: #ffffff; color: #22201c;
+        border: 1px solid #555555; border-radius: 10px; background: #ffffff; color: #111111;
       }
       /* iOS Safari's native date control has a fixed intrinsic width that
          overflows its grid column and pre-displays today's date; taking over
@@ -77,21 +89,22 @@
       .calc input[type="date"]::-webkit-date-and-time-value { margin: 0; text-align: left; line-height: 28px; }
       .calc input[type="date"]::-webkit-datetime-edit { padding: 0; }
       .calc button {
-        width: 100%; margin-top: 14px; font: inherit; font-weight: 700; padding: 12px;
-        border: 0; border-radius: 10px; background: #2e5339; color: #ffffff; cursor: pointer;
+        width: 100%; margin-top: 10px; font: inherit; font-weight: 700; padding: 10px;
+        border: 0; border-radius: 10px; background: #14532d; color: #ffffff; cursor: pointer;
       }
-      .calc-out { margin-top: 14px; border-top: 1px solid #f0ebdf; padding-top: 12px; }
+      .calc-out { margin-top: 10px; border-top: 1px solid #888888; padding-top: 8px; }
       .calc-out p { margin: 4px 0; }
       .calc-big { font-size: 24px; font-weight: 700; }
       .calc-err { color: #b3261e; }
-      .calc-note { font-size: 14px; color: #8a857a; margin: 12px 0 0; }
-      .pin { color: #45423c; white-space: nowrap; }
-      footer { text-align: center; color: #8a857a; font-size: 14px; margin-top: 30px; }
+      .calc-note { font-size: 14px; color: #555555; margin: 8px 0 0; }
+      .pin { color: #111111; white-space: nowrap; }
+      footer { text-align: center; color: #555555; font-size: 14px; margin-top: 16px; }
       @media (max-width: 520px) {
         body { font-size: 18px; }
         h1 { font-size: 26px; }
-        .card .big { font-size: 23px; }
-        th, td { padding: 9px 8px; }
+        .card.hero .big { font-size: 30px; }
+        .card.alltime .big { font-size: 18px; }
+        th, td { padding: 7px 8px; }
         table { font-size: 16px; }
       }
     </style>
@@ -106,12 +119,12 @@
       </header>
 
       <section class="cards" aria-label="Tổng kết">
-        <div class="card wide">
+        <div class="card alltime">
           <p class="label">Tổng cộng <span class="en">· All time</span></p>
           <p class="big">$176.47</p>
           <p class="detail">735.20 kWh · 17 lần sạc</p>
         </div>
-        <div class="card wide">
+        <div class="card hero">
           <p class="label">Tuần này (Tuần 44) <span class="en">· This week</span></p>
           <p class="big">$14.57</p>
           <p class="detail">60.70 kWh · 1 lần sạc</p>
