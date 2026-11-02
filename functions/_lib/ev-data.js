@@ -1,16 +1,17 @@
 /* Home EV charging data — generated from the charging logs:
  *   goals/home-ev-charging-cost-log/files/charging-log-sep-2026.md
  *   goals/home-ev-charging-cost-log/files/charging-log-oct-2026.md
+ *   goals/home-ev-charging-cost-log/files/charging-log-nov-2026.md
  * Rate: $0.24/kWh effective (off-peak $0.34 minus ~32% CARE discount + taxes).
  * Battery: 96 kWh (Mercedes EQE), charge target 90%.
  *
  * startPct/endPct are null where the log does not record battery percentages
  * (all October sessions log charger times instead; 2026-09-28 records neither).
  * Regenerate this module whenever a new session is reported.
- * Latest: session 17 (2026-10-30, 60.70 kWh metered). */
+ * Latest: session 18 (2026-11-02, 50.80 kWh metered). */
 
 export const EV_DATA = {
-  updatedAt: "2026-10-30",
+  updatedAt: "2026-11-02",
   ratePerKwh: 0.24,
   currency: "USD",
   dashboardUrl: "https://truongid.com/ev-t8k2x7m4q9/",
@@ -31,12 +32,14 @@ export const EV_DATA = {
     { date: "2026-10-19", startPct: null, endPct: null, kwh: 27.90, cost: 6.70 },
     { date: "2026-10-21", startPct: null, endPct: null, kwh: 56.90, cost: 13.66 },
     { date: "2026-10-25", startPct: null, endPct: null, kwh: 54.10, cost: 12.98 },
-    { date: "2026-10-30", startPct: null, endPct: null, kwh: 60.70, cost: 14.57 }
+    { date: "2026-10-30", startPct: null, endPct: null, kwh: 60.70, cost: 14.57 },
+    { date: "2026-11-02", startPct: null, endPct: null, kwh: 50.80, cost: 12.19 }
   ],
   totals: {
     september: { kwh: 165.20, cost: 39.65, sessions: 4 },
     october: { kwh: 570.00, cost: 136.82, sessions: 13 },
-    allTime: { kwh: 735.20, cost: 176.47, sessions: 17 }
+    november: { kwh: 50.80, cost: 12.19, sessions: 1 },
+    allTime: { kwh: 786.00, cost: 188.66, sessions: 18 }
   },
-  currentWeek: { isoWeek: "2026-W44", kwh: 60.70, cost: 14.57, sessions: 1 }
+  currentWeek: { isoWeek: "2026-W45", kwh: 50.80, cost: 12.19, sessions: 1 }
 };
