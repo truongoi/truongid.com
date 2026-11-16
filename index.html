@@ -8,6 +8,7 @@
     <link rel="icon" href="data:," />
     <title>Truong Nguyen — Professional ID</title>
     <meta name="description" content="The professional card of Truong Nguyen, front-end engineer and builder of practical digital systems." />
+    <meta name="robots" content="noindex, nofollow" />
     <style>
       :root {
         color-scheme: dark;
@@ -204,6 +205,141 @@
       @media (prefers-reduced-motion: reduce) {
         .cursor-block { animation: none; }
       }
+
+      /* ---------- truongOS lock screen (desktop only) ----------
+         The lock screen covers the whole desktop until the admin
+         password unlocks it. On mobile it never appears: the bare
+         terminal prompt IS the locked state there. */
+      .lockscreen {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 20000;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 11vh;
+        background:
+          linear-gradient(rgba(20, 16, 12, 0.42), rgba(20, 16, 12, 0.55)),
+          radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.10), transparent 55%),
+          linear-gradient(160deg, #6b8570 0%, #43604b 48%, #2e4a37 100%);
+        -webkit-backdrop-filter: blur(18px);
+        backdrop-filter: blur(18px);
+        color: #fff;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+      }
+      body.locked .lockscreen { display: flex; }
+      @media (max-width: 1024px) {
+        body.locked .lockscreen { display: none; }
+      }
+      .lock-time {
+        font-size: 84px;
+        font-weight: 200;
+        line-height: 1;
+        letter-spacing: -1px;
+        text-shadow: 0 2px 18px rgba(0, 0, 0, 0.35);
+      }
+      .lock-date {
+        margin-top: 10px;
+        font-size: 22px;
+        font-weight: 500;
+        text-align: center;
+        text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
+      }
+      .lock-user {
+        margin-top: 7vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+      .lock-avatar {
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(255, 255, 255, 0.65);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        background: rgba(255, 255, 255, 0.2);
+      }
+      .lock-name {
+        font-size: 20px;
+        font-weight: 600;
+        text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
+      }
+      .lock-form { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+      .lock-form input {
+        width: 240px;
+        padding: 10px 16px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.22);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        color: #fff;
+        font: inherit;
+        font-size: 15px;
+        outline: none;
+      }
+      .lock-form input::placeholder { color: rgba(255, 255, 255, 0.75); }
+      .lock-form input:focus { border-color: rgba(255, 255, 255, 0.85); background: rgba(255, 255, 255, 0.30); }
+      .lock-form button {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.22);
+        color: #fff;
+        font-size: 17px;
+        line-height: 1;
+        cursor: pointer;
+      }
+      .lock-form button:hover { background: rgba(255, 255, 255, 0.34); }
+      .lock-error { min-height: 18px; font-size: 13px; color: #ffc4b8; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4); }
+      .lock-hint { font-size: 12.5px; color: rgba(255, 255, 255, 0.75); text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4); }
+      @keyframes lockshake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-9px); }
+        40% { transform: translateX(8px); }
+        60% { transform: translateX(-6px); }
+        80% { transform: translateX(4px); }
+      }
+      .lockscreen.shake .lock-form { animation: lockshake 0.45s ease; }
+      @media (prefers-reduced-motion: reduce) {
+        .lockscreen.shake .lock-form { animation: none; }
+      }
+
+      /* ---------- truongOS menu (T logo dropdown) ---------- */
+      .menubar .tlogo { cursor: pointer; }
+      .apple-menu {
+        position: fixed;
+        top: 32px;
+        left: 10px;
+        z-index: 10001;
+        min-width: 190px;
+        padding: 5px;
+        border-radius: 10px;
+        background: rgba(18, 14, 10, 0.82);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+      }
+      .apple-menu[hidden] { display: none; }
+      .apple-menu button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: 0;
+        padding: 7px 10px;
+        border-radius: 6px;
+        color: #f5ead2;
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .apple-menu button:hover { background: rgba(240, 168, 64, 0.25); }
 
       /* ---------- truongOS desktop: screens wider than 1024px ----------
          Below this width nothing changes: the page stays the fullscreen
@@ -455,6 +591,25 @@
         <button class="dicon" data-open="app:map"><span class="glyph">🗺️</span><span class="lbl">Map</span></button>
       </nav>
       <div class="dock" id="dock" aria-label="Dock"></div>
+      <div class="apple-menu" id="appleMenu" hidden>
+        <button type="button" id="lockScreenItem">Lock Screen</button>
+      </div>
+    </div>
+    <div class="lockscreen" id="lockscreen" aria-label="truongOS lock screen">
+      <div class="lock-clock">
+        <div class="lock-time" id="lockTime"></div>
+        <div class="lock-date" id="lockDate"></div>
+      </div>
+      <div class="lock-user">
+        <img class="lock-avatar" id="lockAvatar" src="images/avatar.jpg" alt="" />
+        <div class="lock-name" id="lockName">Truong Nguyen</div>
+        <form class="lock-form" id="lockForm" autocomplete="off">
+          <input type="password" id="lockPassword" placeholder="Enter Password" aria-label="Password" autocomplete="current-password" />
+          <button type="submit" aria-label="Unlock">→</button>
+        </form>
+        <div class="lock-error" id="lockError" role="alert"></div>
+        <div class="lock-hint">Enter your password to unlock truongOS</div>
+      </div>
     </div>
     <script>
       (function () {
@@ -482,6 +637,8 @@
         var currentInput = null;
         var booted = false;
         var bootSkipped = false;
+        var bootArtShown = false;
+        var desktopMq = window.matchMedia("(min-width: 1025px)");
 
         /* ---------- rendering helpers (textContent only — no innerHTML with data) ---------- */
         function scrollEnd() { pane.scrollTop = pane.scrollHeight; }
@@ -563,6 +720,8 @@
             var v = input.value;
             if (!v || input.selectionStart !== v.length) return "";
             var lv = v.toLowerCase();
+            /* Locked: the only command that exists is `login`. */
+            if (!isAdmin()) return ("login".indexOf(lv) === 0 && lv.length < 5) ? "login" : "";
             for (var i = 0; i < HINTS.length; i++) {
               var h = HINTS[i];
               if (h.length > lv.length && h.indexOf(lv) === 0) return h;
@@ -864,7 +1023,11 @@
             }).then(function (r) {
               if (r.res.ok && r.data.token) {
                 try { window.sessionStorage.setItem(ADMIN_TOKEN_KEY, r.data.token); } catch (e) {}
+                hideLockScreen();
                 collectOut(function () {
+                  /* First login after a locked boot: show the normal
+                     terminal opening, then the welcome line. */
+                  if (!bootArtShown) { bootArtShown = true; bootLines().forEach(function (fn) { fn(); }); }
                   line("Welcome back, admin.", "bright");
                   line("Admin commands unlocked \u2014 `ev` and `logout`. `help` shows them now.", "dim");
                 });
@@ -880,6 +1043,136 @@
             });
           });
         }
+
+        /* ---------- lock screen (desktop) + re-locking ----------
+           Mobile never shows the lock screen: the bare prompt IS the
+           locked state there. On desktop the lock screen covers the whole
+           desktop (menu bar, icons, dock, windows) until the same
+           server-checked password unlocks it. */
+        var LOCK_DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        var LOCK_MONS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        function updateLockClock() {
+          var t = document.getElementById("lockTime");
+          var d = document.getElementById("lockDate");
+          if (!t || !d) return;
+          var now = new Date();
+          var h = now.getHours(), ap = h >= 12 ? "PM" : "AM";
+          h = h % 12 || 12;
+          var mm = String(now.getMinutes());
+          if (mm.length < 2) mm = "0" + mm;
+          t.textContent = h + ":" + mm + " " + ap;
+          d.textContent = LOCK_DAYS[now.getDay()] + ", " + LOCK_MONS[now.getMonth()] + " " + now.getDate();
+        }
+
+        function fillLockIdentity() {
+          var nameEl = document.getElementById("lockName");
+          if (nameEl) nameEl.textContent = fullName();
+          var av = document.getElementById("lockAvatar");
+          if (av && cfg.photo) av.src = cfg.photo;
+        }
+
+        function setLockError(msg) {
+          var el = document.getElementById("lockError");
+          if (el) el.textContent = msg || "";
+        }
+
+        function showLockScreen() {
+          if (!desktopMq.matches) return; /* mobile: the bare prompt is the lock */
+          var ls = document.getElementById("lockscreen");
+          if (!ls) return;
+          document.body.classList.add("locked");
+          var st = document.getElementById("stage");
+          var du = document.getElementById("desktopUi");
+          if (st) st.inert = true;
+          if (du) du.inert = true;
+          updateLockClock();
+          var pw = document.getElementById("lockPassword");
+          if (pw) { pw.value = ""; setLockError(""); pw.focus({ preventScroll: true }); }
+        }
+
+        function hideLockScreen() {
+          document.body.classList.remove("locked");
+          var st = document.getElementById("stage");
+          var du = document.getElementById("desktopUi");
+          if (st) st.inert = false;
+          if (du) du.inert = false;
+        }
+
+        /* Drop the live prompt row (a locked boot leaves one behind the
+           lock screen) so unlock doesn't leave a dead input in scrollback. */
+        function dropLivePrompt() {
+          if (!currentInput) return;
+          var row = currentInput.closest ? currentInput.closest(".prompt-line") : null;
+          if (row && row.parentNode) row.parentNode.removeChild(row);
+          currentInput = null;
+        }
+
+        /* Back to the locked state: bare prompt on mobile, lock screen on desktop. */
+        function lockNow() {
+          clearAdmin();
+          bootArtShown = false;
+          pane.textContent = "";
+          showLockScreen();
+          makePrompt();
+          if (!desktopMq.matches) focusInput();
+        }
+
+        function wireLockScreen() {
+          var form = document.getElementById("lockForm");
+          if (!form) return;
+          var pw = document.getElementById("lockPassword");
+          setInterval(updateLockClock, 20000);
+          form.addEventListener("submit", function (ev) {
+            ev.preventDefault();
+            var val = pw.value;
+            if (!val || pw.disabled) return;
+            pw.disabled = true;
+            fetch("/api/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password: val })
+            }).then(function (res) {
+              return res.json().catch(function () { return {}; }).then(function (data) { return { res: res, data: data }; });
+            }).then(function (r) {
+              pw.disabled = false;
+              if (r.res.ok && r.data.token) {
+                try { window.sessionStorage.setItem(ADMIN_TOKEN_KEY, r.data.token); } catch (e) {}
+                pw.value = "";
+                setLockError("");
+                hideLockScreen();
+                dropLivePrompt();
+                collectOut(function () {
+                  if (!bootArtShown) { bootArtShown = true; bootLines().forEach(function (fn) { fn(); }); }
+                  line("Welcome back, admin.", "bright");
+                });
+                focusInput();
+              } else {
+                setLockError(r.res.status === 503 ? "Admin login is not configured on the server." : "Incorrect password");
+                var ls = document.getElementById("lockscreen");
+                if (ls) { ls.classList.remove("shake"); void ls.offsetWidth; ls.classList.add("shake"); }
+                pw.value = "";
+                pw.focus({ preventScroll: true });
+              }
+            }).catch(function () {
+              pw.disabled = false;
+              setLockError("Could not reach the server.");
+              pw.value = "";
+              pw.focus({ preventScroll: true });
+            });
+          });
+        }
+
+        /* Crossing the 1024px line while locked: the lock screen follows the viewport. */
+        function onLockMqChange() {
+          if (desktopMq.matches) { if (!isAdmin()) showLockScreen(); }
+          else { hideLockScreen(); }
+        }
+        if (desktopMq.addEventListener) desktopMq.addEventListener("change", onLockMqChange);
+        else if (desktopMq.addListener) desktopMq.addListener(onLockMqChange);
+
+        /* The desktop menu (script 2) calls this to re-lock. */
+        window.__truongos = { lock: lockNow, isAdmin: isAdmin };
 
         function fmtMoney(n) { return "$" + Number(n).toFixed(2); }
         function fmtKwh(n) { return Number(n).toFixed(2) + " kWh"; }
@@ -1034,6 +1327,7 @@
         function rebootSeq(recovered) {
           pane.textContent = "";
           var steps = bootLines();
+          if (steps.length) bootArtShown = true;
           var i = 0;
           (function next() {
             if (i < steps.length) { steps[i](); i++; setTimeout(next, 130); }
@@ -1086,6 +1380,12 @@
           var lower = input.toLowerCase();
           if (!input) { done(); return; }
           outQueue = []; /* collect this command's output for slow playback */
+
+          /* Locked: the only way in is `login`. `clear` just wipes the bare screen. */
+          if (!isAdmin() && lower !== "login" && lower !== "clear") {
+            line("login required \u2014 type `login` to continue.", "dim");
+            finish(); return;
+          }
 
           /* rm -rf outranks the sudo gag — even under sudo */
           var sudoed = lower === "sudo" || lower.indexOf("sudo ") === 0;
@@ -1161,9 +1461,9 @@
             return;
           }
           if (isAdmin() && lower === "logout") {
-            clearAdmin();
-            line("Logged out \u2014 admin commands locked.");
-            finish(); return;
+            outQueue = null;
+            lockNow();
+            return;
           }
           if (isAdmin() && lower === "ev") { outQueue = null; runEv(); return; }
 
@@ -1244,6 +1544,8 @@
         /* Minimal boot: one sentence + the ASCII wordmark. Everything else
            about Truong is discovered through commands. */
         function bootLines() {
+          /* Locked: nothing to show yet — the bare prompt is the whole screen. */
+          if (!isAdmin()) return [];
           return [
             function () { line("Welcome to truongOS 1.0", "bright"); },
             function () { line(ART_LINES.join("\n"), "ascii"); }
@@ -1254,6 +1556,8 @@
           if (booted) return;
           booted = true;
           var steps = bootLines();
+          if (!steps.length) { makePrompt(); return; } /* locked: bare prompt only */
+          bootArtShown = true;
           if (reduceMotion) {
             steps.forEach(function (fn) { fn(); });
             makePrompt();
@@ -1303,12 +1607,21 @@
 
         /* ---------- config first (fast), then boot ---------- */
         var bootStarted = false;
-        function start() { if (!bootStarted) { bootStarted = true; boot(); } }
+        function start() {
+          if (!bootStarted) {
+            bootStarted = true;
+            boot();
+            if (desktopMq.matches && !isAdmin()) showLockScreen();
+          }
+        }
+        wireLockScreen();
+        fillLockIdentity();
         fetch("id-config.json", { cache: "no-store" })
           .then(function (res) { if (!res.ok) throw new Error("no config"); return res.json(); })
           .then(function (data) {
             cfg = Object.assign({}, DEFAULTS, data || {});
             if (cfg.pageTitle) document.title = cfg.pageTitle;
+            fillLockIdentity();
           })
           .catch(function () {})
           .then(start);
@@ -1336,6 +1649,7 @@
         var zTop = 20;
         var wins = {}; /* key -> window element (folder / note / app windows) */
         var termMoved = false;
+        var desktopInitDone = false;
 
         /* ----- focus / z-order ----- */
         function focusWin(el) {
@@ -1724,6 +2038,7 @@
           centerTerm();
           dockItem("term", "💻", "Terminal", restoreTerm);
           focusWin(termWin);
+          desktopInitDone = true;
         }
 
         function teardownDesktop() {
@@ -1737,6 +2052,26 @@
           termWin.style.zIndex = "";
           termWin.style.display = "";
           termWin.classList.remove("inactive");
+        }
+
+        /* ----- truongOS menu (T logo): Lock Screen ----- */
+        var tlogo = document.querySelector(".menubar .tlogo");
+        var appleMenu = document.getElementById("appleMenu");
+        var lockItem = document.getElementById("lockScreenItem");
+        if (tlogo && appleMenu) {
+          tlogo.setAttribute("role", "button");
+          tlogo.setAttribute("title", "truongOS menu");
+          tlogo.addEventListener("click", function (ev) {
+            ev.stopPropagation();
+            appleMenu.hidden = !appleMenu.hidden;
+          });
+          document.addEventListener("click", function (ev) {
+            if (!appleMenu.hidden && !appleMenu.contains(ev.target)) appleMenu.hidden = true;
+          });
+          if (lockItem) lockItem.addEventListener("click", function () {
+            appleMenu.hidden = true;
+            if (window.__truongos && window.__truongos.lock) window.__truongos.lock();
+          });
         }
 
         /* ----- desktop icons ----- */
@@ -1771,6 +2106,7 @@
         /* ----- mode switching ----- */
         function onModeChange() {
           if (isDesktop()) {
+            if (!desktopInitDone) initDesktop();
             Object.keys(wins).forEach(function (k) { if (wins[k].dataset.wasHidden !== "1") wins[k].style.display = ""; });
             centerTerm();
             focusWin(termWin);
